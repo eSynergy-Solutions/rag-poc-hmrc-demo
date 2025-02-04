@@ -83,7 +83,7 @@ class RagChat(Chat):
 
     def chat_query(
         self, chat_history: list[ChatMessage], streamed=False
-    ) -> ChatMessage | Generator[str]:
+    ) -> ChatMessage | Generator[str, None, None]:
         """
         Queries the LLM with chat history augmented by retrieval.
 
