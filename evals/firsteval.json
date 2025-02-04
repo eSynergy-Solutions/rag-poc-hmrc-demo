@@ -1,0 +1,125 @@
+{
+    "test": {
+        "score": "0/6",
+        "questions": [
+            {
+                "query": "How many Environmental Land Management (ELM) schemes are there?",
+                "response": "Echo: How many Environmental Land Management (ELM) schemes are there?",
+                "answer": "3",
+                "eval": false
+            },
+            {
+                "query": "How long does a Sustainable Farming Incentive (SFI) scheme last?",
+                "response": "Echo: How long does a Sustainable Farming Incentive (SFI) scheme last?",
+                "answer": "3-5 years ",
+                "eval": false
+            },
+            {
+                "query": "Does Countryside Stewardship pay me to increase biodiversity?",
+                "response": "Echo: Does Countryside Stewardship pay me to increase biodiversity?",
+                "answer": "Yes",
+                "eval": false
+            },
+            {
+                "query": "Do I need to have 500 connected hectares of land to get Landscape Recovery funding?",
+                "response": "Echo: Do I need to have 500 connected hectares of land to get Landscape Recovery funding?",
+                "answer": "Yes",
+                "eval": false
+            },
+            {
+                "query": "Can I still apply for the Farmin and Technology fund?",
+                "response": "Echo: Can I still apply for the Farmin and Technology fund?",
+                "answer": "No, applications are now closed",
+                "eval": false
+            },
+            {
+                "query": "Are there any grants for increasing productivity on my farm that I can currently apply to",
+                "response": "Echo: Are there any grants for increasing productivity on my farm that I can currently apply to",
+                "answer": "yes",
+                "eval": false
+            }
+        ]
+    },
+    "adslr": {
+        "score": "3/6",
+        "questions": [
+            {
+                "query": "How many Environmental Land Management (ELM) schemes are there?",
+                "response": "The provided context does not specify the exact number of Environmental Land Management (ELM) schemes. If you need detailed information about the number of ELM schemes, I recommend checking the latest updates from the Department for Environment, Food & Rural Affairs or related government publications.",
+                "answer": "3",
+                "eval": false
+            },
+            {
+                "query": "How long does a Sustainable Farming Incentive (SFI) scheme last?",
+                "response": "I don't know. The provided context does not specify the duration of a Sustainable Farming Incentive (SFI) scheme.",
+                "answer": "3-5 years ",
+                "eval": false
+            },
+            {
+                "query": "Does Countryside Stewardship pay me to increase biodiversity?",
+                "response": "Yes, Countryside Stewardship provides financial incentives for farmers, foresters, and land managers to increase biodiversity among other environmental improvements.",
+                "answer": "Yes",
+                "eval": true
+            },
+            {
+                "query": "Do I need to have 500 connected hectares of land to get Landscape Recovery funding?",
+                "response": "The provided context does not specify a requirement for having 500 connected hectares of land to receive Landscape Recovery funding. The scheme supports long-term and large-scale projects, but specific size requirements are not mentioned. You may need to refer to the detailed guidance or criteria for more specific requirements related to land size.",
+                "answer": "Yes",
+                "eval": false
+            },
+            {
+                "query": "Can I still apply for the Farmin and Technology fund?",
+                "response": "No, the Farming Equipment and Technology Fund 2024 is closed for applications.",
+                "answer": "No, applications are now closed",
+                "eval": true
+            },
+            {
+                "query": "Are there any grants for increasing productivity on my farm that I can currently apply to",
+                "response": "If you are an invited applicant, you can apply for the Improving Farm Productivity grant round 2, which is available to help fund farm and horticulture productivity in England. The grant is for capital items to improve productivity and ranges from \u00a325,000 to \u00a3500,000 for robotic or automatic equipment. If you are not an invited applicant, you may need to look for other grants and funds available for farmers and land managers in England. You can also explore the Sustainable Farming Incentive (SFI) for potential funding opportunities.",
+                "answer": "yes",
+                "eval": true
+            }
+        ]
+    },
+    "simplerag": {
+        "score": "4/6",
+        "questions": [
+            {
+                "query": "How many Environmental Land Management (ELM) schemes are there?",
+                "response": "There are three Environmental Land Management (ELM) schemes. These are:\n\n1. Sustainable Farming Incentive (SFI)\n2. Local Nature Recovery\n3. Landscape Recovery\n\nThese schemes are designed to support farmers and land managers in protecting the environment while also enabling sustainable food production.",
+                "answer": "3",
+                "eval": true
+            },
+            {
+                "query": "How long does a Sustainable Farming Incentive (SFI) scheme last?",
+                "response": "The Sustainable Farming Incentive (SFI) scheme agreements generally last for three years. However, participants have the flexibility to amend or exit their agreements annually if needed.",
+                "answer": "3-5 years ",
+                "eval": false
+            },
+            {
+                "query": "Does Countryside Stewardship pay me to increase biodiversity?",
+                "response": "Yes, Countryside Stewardship (CS) does provide financial incentives for increasing biodiversity. It is part of a broader initiative to protect and enhance the natural environment, which includes improving habitats and increasing biodiversity. CS supports these goals through different tiers and grants aimed at environmental improvements, including biodiversity enhancement.",
+                "answer": "Yes",
+                "eval": true
+            },
+            {
+                "query": "Do I need to have 500 connected hectares of land to get Landscape Recovery funding?",
+                "response": "No, you do not need to have 500 connected hectares of land to get Landscape Recovery funding. The scheme provides funding for long-term and large-scale projects, but there is no specific requirement in the provided context that states you must have 500 connected hectares. Projects can span multiple land holdings, and you do not need to own or control all the land, but you will need support from the landowners involved.",
+                "answer": "Yes",
+                "eval": false
+            },
+            {
+                "query": "Can I still apply for the Farmin and Technology fund?",
+                "response": "No, you cannot apply for the Farming Equipment and Technology Fund (FETF) 2024 as it is closed for applications. However, you may want to explore other grants and funds that might be available under the Farming Investment Fund, such as the Slurry Infrastructure grant or other specific opportunities listed on the DEFRA website.",
+                "answer": "No, applications are now closed",
+                "eval": true
+            },
+            {
+                "query": "Are there any grants for increasing productivity on my farm that I can currently apply to",
+                "response": "Currently, there are grants available for increasing productivity on your farm, but eligibility and application processes vary. Specifically, the \"Improving Farm Productivity grant round 2\" is available for invited applicants. This grant is for capital items to improve farm and horticulture productivity, with a value between \u00a325,000 and \u00a3500,000 for robotic or automatic equipment. However, only invited applicants can apply for this round.\n\nAdditionally, you can explore other funding opportunities through the Department for Environment, Food & Rural Affairs and the Rural Payments Agency. They offer various grants and funding options for farmers and land managers in England. You can use their tool to find actions you can get paid for as part of the Sustainable Farming Incentive (SFI), but you'll need to check the SFI guidance to confirm your eligibility.\n\nIf you're a cattle farmer, there is also the \"Calf Housing for Health and Welfare grant,\" which allows applications until 30 April 2025. For solar photovoltaic (PV) systems, there is a grant available for farmers and horticulturalists in England, with applications open until 31 July 2025.",
+                "answer": "yes",
+                "eval": true
+            }
+        ]
+    }
+}

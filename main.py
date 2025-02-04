@@ -1,34 +1,69 @@
-from fastapi import FastAPI, Form, Request, status
-from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from src.history.BasicHistory import BaseHistory
+from src.schemas.ChatSchemas import ChatMessage
+from src.chat.Chat import Chat
+import importlib
+import os
+import logging
 import uvicorn
+from routers import chat, history, test
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
 
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    print('Request for index page received')
-    return templates.TemplateResponse('index.html', {"request": request})
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get('/favicon.ico')
-async def favicon():
-    file_name = 'favicon.ico'
-    file_path = './static/' + file_name
-    return FileResponse(path=file_path, headers={'mimetype': 'image/vnd.microsoft.icon'})
+# Input and output schemas
 
-@app.post('/hello', response_class=HTMLResponse)
-async def hello(request: Request, name: str = Form(...)):
-    if name:
-        print('Request for hello page received with name=%s' % name)
-        return templates.TemplateResponse('hello.html', {"request": request, 'name':name})
-    else:
-        print('Request for hello page received with no name or blank name -- redirecting')
-        return RedirectResponse(request.url_for("index"), status_code=status.HTTP_302_FOUND)
 
+class QueryRequest(BaseModel):
+    content: str
+
+
+class QueryResponse(BaseModel):
+    content: ChatMessage
+
+
+class HistoryResponse(BaseModel):
+    content: list[ChatMessage]
+
+
+# Initialise History and RAG objects
+
+
+def get_chat_instance() -> Chat:
+    chat_class_path = "src.chat.HMRCRag.HMRCRAG"
+    logger.info(f"Using chat implementation: {chat_class_path}")
+    module_name, class_name = chat_class_path.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    chat_class = getattr(module, class_name)
+    return chat_class()
+
+
+HistoryObject = BaseHistory()
+logger.info("HistoryObject initialized.")
+
+ChatObject: Chat = get_chat_instance()
+logger.info("ChatObject initialized.")
+
+app.state.HistoryObject = HistoryObject
+app.state.ChatObject = ChatObject
+
+app.include_router(chat.router)
+app.include_router(history.router)
+app.include_router(test.router)
+
+# Startup script for direct running
 if __name__ == '__main__':
     uvicorn.run('main:app', host='0.0.0.0', port=8000)
-
