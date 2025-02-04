@@ -1,6 +1,8 @@
 # Local environment specific
 .azure/
 .vscode/
+.github/
+.github/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -131,3 +133,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+az webapp up --runtime PYTHON:3.12 --sku B1 --name rag-poc-backend --resource-group rag-poc --logs --location "UK South"
+
+az webapp config set \
+    --startup-file "gunicorn -w 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 main:app" \
+    --name rag-poc-backend \
+    --resource-group rag-poc
+
+az webapp log tail --name rag-poc-backend --resource-group rag-poc
+
+az webapp deployment source config-local-git --name rag-poc-backend --resource-group rag-poc
