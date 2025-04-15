@@ -25,10 +25,10 @@ class QueryResponse(BaseModel):
 # Router
 
 
-@router.post("/chat")
-def chat(query: QueryRequest, request: Request):
-    HistoryObject = request.app.state.HistoryObjectHMRC
-    ChatObject = request.app.state.ChatObjectHmrcApiAgent
+@router.post("/oas-checker")
+def oasChecker(query: QueryRequest, request: Request):
+    HistoryObject = request.app.state.HistoryObjectOASChecker
+    ChatObject = request.app.state.ChatObjectOasAgent
     logger.info(f"Received chat request: {query.content} streaming={query.streaming}")
     message = ChatMessage(role="user", content=query.content)
     HistoryObject.record_message(message)

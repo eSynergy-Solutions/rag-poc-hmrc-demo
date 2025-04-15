@@ -1,7 +1,5 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from pydantic import BaseModel
-from fastapi.responses import StreamingResponse
-from src.schemas.ChatSchemas import ChatMessage
 import logging
 
 # Configure logging
