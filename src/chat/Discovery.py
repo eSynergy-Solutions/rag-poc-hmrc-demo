@@ -8,11 +8,18 @@ import os
 from typing import Generator
 from src.prompts import DiscoveryPrompt
 from src.schemas.ChatSchemas import ChatMessage
+import logging
 
 load_dotenv()
 
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
-class RagChat(Chat):
+logger.info("Discovery module initialised")
+
+
+class DiscoveryRAGChat(Chat):
     """
     This class offers a simple implementation of the Chat interface using a basic RAG workflow with Azure OpenAI as the LLM and AstraDB as the vector database.
 
@@ -26,7 +33,7 @@ class RagChat(Chat):
             os.getenv("ASTRA_DB_API_ENDPOINT"), keyspace=os.getenv("ASTRA_DB_KEYSPACE")
         )
         self.vectordb = database.get_collection(
-            os.getenv("DS_COLLECTION_NAME", "HMRC_API_ROTOTYPE1_CHUNKED")
+            os.getenv("DS_COLLECTION_NAME", "HMRC_API_ROTOTYPE1")
         )
         self.llm = litellm
 
@@ -52,6 +59,8 @@ class RagChat(Chat):
             sort={"$vector": embedding},
             limit=chunk_limit,
         )
+        logger.info(f"Chunks fetched for your query: {chunks}")
+
         return [c["content"] for c in chunks]
 
     def get_context(self, chat_history: list[ChatMessage]) -> list[dict]:

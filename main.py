@@ -5,10 +5,11 @@ from src.history.BasicHistory import BaseHistory
 from src.schemas.ChatSchemas import ChatMessage
 from src.chat.HMRCRag import HMRCRAG
 from src.chat.SingleShotAgent import SingleShotAgent
+from src.chat.Discovery import DiscoveryRAGChat
 from src.prompts import OASCheckerPrompt
 import logging
 import uvicorn
-from routers import chat, test, oasChecker
+from routers import chat, test, oasChecker, discovery
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -62,21 +63,26 @@ class HistoryResponse(BaseModel):
 
 HistoryObjectHMRC = BaseHistory()
 HistoryObjectOASChecker = BaseHistory()
+HistoryObjectDiscovery = BaseHistory()
 logger.info("HistoryObject initialized.")
 
 ChatObjectHmrcApiAgent: HMRCRAG = HMRCRAG()
 ChatObjectOasAgent: SingleShotAgent = SingleShotAgent(sysPromptContent=OASCheckerPrompt)
+ChatObjectDiscovery: DiscoveryRAGChat = DiscoveryRAGChat()
 logger.info("ChatObjects initialized.")
 
 app.state.HistoryObjectHMRC = HistoryObjectHMRC
 app.state.HistoryObjectOASChecker = HistoryObjectOASChecker
+app.state.HistoryObjectDiscovery = HistoryObjectDiscovery
 app.state.ChatObjectHmrcApiAgent = ChatObjectHmrcApiAgent
 app.state.ChatObjectOasAgent = ChatObjectOasAgent
+app.state.ChatObjectDiscovery = ChatObjectDiscovery
 
 app.include_router(chat.router)
 # app.include_router(history.router)
 app.include_router(test.router)
 app.include_router(oasChecker.router)
+app.include_router(discovery.router)
 
 # Startup script for direct running
 if __name__ == "__main__":
