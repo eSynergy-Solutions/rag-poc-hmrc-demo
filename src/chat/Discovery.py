@@ -8,15 +8,8 @@ import os
 from typing import Generator
 from src.prompts import DiscoveryPrompt
 from src.schemas.ChatSchemas import ChatMessage
-import logging
 
 load_dotenv()
-
-# Configure logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-logger.info("Discovery module initialised")
 
 
 class DiscoveryRAGChat(Chat):
@@ -59,7 +52,6 @@ class DiscoveryRAGChat(Chat):
             sort={"$vector": embedding},
             limit=chunk_limit,
         )
-        logger.info(f"Chunks fetched for your query: {chunks}")
 
         return [c["content"] for c in chunks]
 
