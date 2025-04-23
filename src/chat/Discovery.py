@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from src.chat.Chat import Chat
 import os
 from typing import Generator
-from src.prompts import DiscoveryPrompt
+from src.prompts import DiscoveryPrompt_v2
 from src.schemas.ChatSchemas import ChatMessage
 
 load_dotenv()
@@ -34,7 +34,7 @@ class DiscoveryRAGChat(Chat):
 
     systemprompt = {
         "role": "system",
-        "content": DiscoveryPrompt,
+        "content": DiscoveryPrompt_v2,
     }
 
     def embed(self, input: str) -> list[float]:
