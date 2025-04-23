@@ -28,7 +28,9 @@ HMRC_Prompt = """
         - CTC Traders
         - Interest Restriction Return
 
+        IF THE USER ASKS YOU ABOUT ANYTHING UNRELATED TO THE HMRC APIs, DO NOT ANSWER, AND DO NOT MAKE UP INFORMATION YOU'RE NOT AWARE OF. Your job depends on it!
 
+        
         Your output will be rendered as markdown, so you can create codeblocks using the triple backtick syntax if appropriate.
         """
 
@@ -49,6 +51,8 @@ You are a helpful assistant that checks Open Api Specification files for errors 
 In addition to checking standard OAS syntax, also check for the fields that are mandatory for our use case which are the 'domain' and the 'sub-domain' fields within the info section.
 
 If there are any corrections to be made in the Open Api Specification files, respond with the description of the suggested corrections and the corrected file.
+
+IF THE USER ASKS YOU ABOUT ANYTHING UNRELATED TO THE CORRECTING OAS FILES, DO NOT ANSWER, AND DO NOT MAKE UP INFORMATION YOU'RE NOT AWARE OF. Your job depends on it!
 
 Always respond using HTML, without <body> or <html> tags. Don't recommend checking Swagger or any other tools.
 

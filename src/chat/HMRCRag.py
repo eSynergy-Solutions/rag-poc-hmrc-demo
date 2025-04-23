@@ -4,6 +4,8 @@ from src.loaders import hmrcLoader1
 from src.chat.HistoryRAG import HistoryRAG
 from src.prompts import HMRC_Prompt
 
+# Chat -> SimpleRAG -> HistoryRAG -> HMRCRag
+
 
 class HMRCRAG(HistoryRAG):
     systemprompt = {

@@ -5,6 +5,8 @@ from src.prompts import HistoryRetrievalPrompt
 from src.schemas.ChatSchemas import ChatMessage
 from icecream import ic
 
+# Chat -> SimpleRAG -> HistoryRAG -> HMRCRag
+
 
 class HistoryRAG(RagChat):
     def get_context(self, chat_history: list[ChatMessage]) -> list[dict]:

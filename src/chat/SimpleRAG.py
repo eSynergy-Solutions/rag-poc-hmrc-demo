@@ -11,6 +11,8 @@ from src.schemas.ChatSchemas import ChatMessage
 
 load_dotenv()
 
+# Chat -> SimpleRAG -> HistoryRAG -> HMRCRag
+
 
 class RagChat(Chat):
     """

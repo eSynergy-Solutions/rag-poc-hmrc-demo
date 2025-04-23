@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from src.schemas.ChatSchemas import ChatMessage
 from typing import Generator, Optional
 
+# Chat -> SimpleRAG -> HistoryRAG -> HMRCRag
+
 
 class Chat(ABC):
     """
