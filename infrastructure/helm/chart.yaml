@@ -1,0 +1,15 @@
+apiVersion: v2
+name: rag-poc-hmrc-demo
+description: A Helm chart for deploying the RAG-POC HMRC Demo application
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+maintainers:
+  - name: eSynergy Solutions
+    email: dev@esynergy.solutions
+
+sources:
+  - https://github.com/eSynergy-Solutions/rag-poc-hmrc-demo
+
+# Default values can be overridden in values.yaml

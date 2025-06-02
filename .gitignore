@@ -3,6 +3,9 @@
 .vscode/
 .github/
 .github/*
+prompt_ignore.txt
+generated_prompt.txt
+generated_prompt_1.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
