@@ -4,12 +4,13 @@ from typing import List, Dict, Any
 import chromadb
 from chromadb.config import Settings
 from langchain.schema import BaseRetriever, Document
-from app.vectorstore.interface import VectorStore
-from app.models.ingest import Chunk
-from app.errors import StorageError
+from vectorstore.interface import VectorStore
+from models.ingest import Chunk
+from errors import StorageError
 
 # Cache one persistent Chroma client per directory
 _CLIENTS: Dict[str, chromadb.PersistentClient] = {}
+
 
 class ChromaStore(VectorStore):
     """
@@ -37,11 +38,12 @@ class ChromaStore(VectorStore):
         """
         try:
             # Import get_embedding at runtime so that any test-patched version is used
-            from app.llm.embeddings import get_embedding
+            from llm.embeddings import get_embedding
 
             ids = [f"{chunk.path}-{chunk.chunk_index}" for chunk in chunks]
             metadatas = [
-                {"path": chunk.path, "chunk_index": chunk.chunk_index} for chunk in chunks
+                {"path": chunk.path, "chunk_index": chunk.chunk_index}
+                for chunk in chunks
             ]
             documents = [chunk.content for chunk in chunks]
             embeddings = [get_embedding(chunk.content) for chunk in chunks]
@@ -114,15 +116,20 @@ class ChromaStore(VectorStore):
                 converting each Chunk into a Document. Raises StorageError on failure.
                 """
                 try:
-                    from app.llm.embeddings import get_embedding
+                    from llm.embeddings import get_embedding
 
                     emb = get_embedding(query)
                     chunks = self.store.query(emb, k=self.k)
                     return [
-                        Document(page_content=c.content, metadata={"path": c.path, "chunk_index": c.chunk_index})
+                        Document(
+                            page_content=c.content,
+                            metadata={"path": c.path, "chunk_index": c.chunk_index},
+                        )
                         for c in chunks
                     ]
                 except Exception as e:
-                    raise StorageError(f"ChromaRetriever.get_relevant_documents failed: {e}")
+                    raise StorageError(
+                        f"ChromaRetriever.get_relevant_documents failed: {e}"
+                    )
 
         return _ChromaRetriever(self, k)

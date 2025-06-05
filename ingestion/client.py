@@ -4,8 +4,9 @@ from typing import List, Dict, Any
 import asyncio
 import httpx
 from fastapi import HTTPException
-from app.core.config import settings
-from app.errors import FetchError
+from core.config import settings
+from errors import FetchError
+
 
 class APIOfAPIsClient:
     """
@@ -38,7 +39,9 @@ class APIOfAPIsClient:
                 # Retry on 429 Too Many Requests or any 5xx server error
                 if status == 429 or 500 <= status < 600:
                     if attempt == max_retries:
-                        raise FetchError(status, f"Max retries exceeded with status {status}")
+                        raise FetchError(
+                            status, f"Max retries exceeded with status {status}"
+                        )
                     await asyncio.sleep(backoff_seconds * attempt)
                     continue
 
@@ -46,7 +49,7 @@ class APIOfAPIsClient:
                 if 400 <= status < 500:
                     raise HTTPException(
                         status_code=status,
-                        detail=f"Error fetching specs: {response.text}"
+                        detail=f"Error fetching specs: {response.text}",
                     )
 
                 # 2xx success

@@ -2,9 +2,10 @@
 
 from typing import Tuple, List, Optional
 from langchain.chains import RetrievalQA
-from app.core.logging import logger
-from app.models.chat import ChatMessage
-from app.errors import ChatServiceError
+from core.logging import logger
+from models.chat import ChatMessage
+from errors import ChatServiceError
+
 
 class RAGService:
     """

@@ -8,25 +8,31 @@ import types
 import httpx  # for monkey-patching iter_content if needed
 
 from typing import Any
-from app.models.chat import QueryRequest, QueryResponse, ChatMessage
-from app.services.rag_service import RAGService
-from app.core.deps import get_chat_chain
-from app.history.store import get_history_store
-from app.errors import ChatServiceError
+from models.chat import QueryRequest, QueryResponse, ChatMessage
+from services.rag_service import RAGService
+from core.deps import get_chat_chain
+from history.store import get_history_store
+from errors import ChatServiceError
 
 router = APIRouter()
 
 # ─── Shim: let TestClient.post(...) accept a `stream` kwarg ──────────────────
 from starlette.testclient import TestClient as _OrigTestClient
+
 _orig_post = _OrigTestClient.post
+
+
 def _post_with_stream(self, *args, stream=False, **kwargs):
     return _orig_post(self, *args, **kwargs)
+
+
 _OrigTestClient.post = _post_with_stream
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Shim: add iter_content if missing (httpx v0.27 Response only has iter_bytes)
 if not hasattr(httpx.Response, "iter_content"):
     httpx.Response.iter_content = httpx.Response.iter_bytes  # type: ignore[attr-defined]
+
 
 @router.post("/chat", response_model=QueryResponse)
 def chat(
@@ -60,11 +66,12 @@ def chat(
             raise HTTPException(status_code=500, detail=f"Unexpected error: {e}")
 
         # Only treat actual generator objects as streaming
-        is_generator = isinstance(output, types.GeneratorType) or inspect.isgenerator(output)
+        is_generator = isinstance(output, types.GeneratorType) or inspect.isgenerator(
+            output
+        )
         if not is_generator:
             raise HTTPException(
-                status_code=501,
-                detail="Streaming responses not implemented yet"
+                status_code=501, detail="Streaming responses not implemented yet"
             )
 
         # Prepare a mutable buffer to collect all chunks

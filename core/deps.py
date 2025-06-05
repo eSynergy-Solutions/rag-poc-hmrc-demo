@@ -3,12 +3,12 @@
 from typing import Generator
 from fastapi import Depends, HTTPException
 
-from app.core.config import settings
-from app.core.logging import logger
-from app.llm.embeddings import get_embedding
-from app.llm.chat_chain import build_chat_chain
-from app.vectorstore.interface import VectorStore
-from app.vectorstore.astradb import AstraStore
+from core.config import settings
+from core.logging import logger
+from llm.embeddings import get_embedding
+from llm.chat_chain import build_chat_chain
+from vectorstore.interface import VectorStore
+from vectorstore.astradb import AstraStore
 
 
 def get_settings() -> Generator:
@@ -46,8 +46,9 @@ def get_vector_store(
 def get_embedding_fn(
     config=Depends(get_settings),
 ) -> Generator:
-    # Yield the single canonical function object from app.llm.embeddings
+    # Yield the single canonical function object from llm.embeddings
     import app.llm.embeddings as _emb_mod
+
     yield _emb_mod.get_embedding
 
 

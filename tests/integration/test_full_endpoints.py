@@ -2,15 +2,16 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app
-from app.core.deps import get_chat_chain
+from main import app
+from core.deps import get_chat_chain
 
-from app.models.chat import QueryRequest
+from models.chat import QueryRequest
 
 # ────────────────────────────────────────────────────────────────────────────────
 # Whenever we call /v1/chat or /v1/discover, we need a "chain" that returns
 # a predictable result. We override get_chat_chain with a dummy here.
 # ────────────────────────────────────────────────────────────────────────────────
+
 
 class DummyChain:
     def __call__(self, inputs):
@@ -36,6 +37,7 @@ client = TestClient(app)
 # 1) Health endpoints
 # ────────────────────────────────────────────────────────────────────────────────
 
+
 def test_health_live_and_ready():
     resp_live = client.get("/v1/health/live")
     assert resp_live.status_code == 200
@@ -48,10 +50,12 @@ def test_health_live_and_ready():
 # 2) Chat endpoint
 # ────────────────────────────────────────────────────────────────────────────────
 
+
 def test_chat_missing_body_returns_422():
     # No JSON body at all → FastAPI should respond with 422 Unprocessable Entity
     resp = client.post("/v1/chat")
     assert resp.status_code == 422
+
 
 def test_chat_incorrect_content_type_returns_422():
     # "content" must be a string; if we send an integer, Pydantic will reject
@@ -59,12 +63,14 @@ def test_chat_incorrect_content_type_returns_422():
     resp = client.post("/v1/chat", json=payload)
     assert resp.status_code == 422
 
+
 def test_chat_streaming_true_returns_501():
     # streaming=True is not implemented → 501 Not Implemented
     payload = {"content": "hello", "streaming": True}
     resp = client.post("/v1/chat", json=payload)
     assert resp.status_code == 501
     assert resp.json()["detail"] == "Streaming responses not implemented yet"
+
 
 def test_chat_success_returns_dummy_response():
     # Proper usage: content is a string, streaming omitted or False
@@ -84,20 +90,24 @@ def test_chat_success_returns_dummy_response():
 # 3) Discover endpoint
 # ────────────────────────────────────────────────────────────────────────────────
 
+
 def test_discover_missing_body_returns_422():
     resp = client.post("/v1/discover")
     assert resp.status_code == 422
+
 
 def test_discover_incorrect_content_type_returns_422():
     payload = {"content": 456, "streaming": False}
     resp = client.post("/v1/discover", json=payload)
     assert resp.status_code == 422
 
+
 def test_discover_streaming_true_returns_501():
     payload = {"content": "hello", "streaming": True}
     resp = client.post("/v1/discover", json=payload)
     assert resp.status_code == 501
     assert resp.json()["detail"] == "Streaming not implemented for discovery"
+
 
 def test_discover_success_returns_dummy_response():
     payload = {"content": "Some API spec text", "streaming": False}
@@ -117,9 +127,11 @@ def test_discover_success_returns_dummy_response():
 # 4) OAS‐check endpoint
 # ────────────────────────────────────────────────────────────────────────────────
 
+
 def test_oas_check_missing_body_returns_422():
     resp = client.post("/v1/oas-check")
     assert resp.status_code == 422
+
 
 def test_oas_check_invalid_spec_returns_400():
     # Missing the top‐level "openapi" field
@@ -135,6 +147,7 @@ paths: {}
     text = resp.text
     assert "Specification Validation Failed" in text
 
+
 def test_oas_check_malformed_yaml_returns_400():
     # Unparsable YAML → should surface parse error in response.errors
     bad = "::: not valid yaml :::"
@@ -143,7 +156,10 @@ def test_oas_check_malformed_yaml_returns_400():
     assert resp.status_code == 400
     assert "Specification Validation Failed" in resp.text
     # Might contain "Failed to parse spec"
-    assert "Failed to parse spec" in resp.text or "paths: must be an object" in resp.text
+    assert (
+        "Failed to parse spec" in resp.text or "paths: must be an object" in resp.text
+    )
+
 
 def test_oas_check_minimal_valid_spec_returns_200():
     minimal = """
@@ -163,11 +179,15 @@ paths: {}
 # 5) Non‐existent routes under /v1 should return 404
 # ────────────────────────────────────────────────────────────────────────────────
 
-@pytest.mark.parametrize("method, path", [
-    ("GET",  "/v1/nonexistent"),
-    ("POST", "/v1/foo_bar"),
-    ("PUT",  "/v1/chat/extra"),
-])
+
+@pytest.mark.parametrize(
+    "method, path",
+    [
+        ("GET", "/v1/nonexistent"),
+        ("POST", "/v1/foo_bar"),
+        ("PUT", "/v1/chat/extra"),
+    ],
+)
 def test_unknown_v1_routes_return_404(method, path):
     client_method = getattr(client, method.lower())
     if method == "GET":

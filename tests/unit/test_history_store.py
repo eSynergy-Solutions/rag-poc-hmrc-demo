@@ -1,8 +1,8 @@
 # app/tests/unit/test_history_store.py
 
 import pytest
-from app.history.store import get_history_store, InMemoryHistoryStore
-from app.models.chat import ChatMessage
+from history.store import get_history_store, InMemoryHistoryStore
+from models.chat import ChatMessage
 
 
 @pytest.fixture(autouse=True)

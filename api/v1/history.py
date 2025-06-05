@@ -1,11 +1,12 @@
 # app/api/v1/history.py
 
 from fastapi import APIRouter, Request, HTTPException
-from app.models.chat import ChatMessage
+from models.chat import ChatMessage
 from pydantic import BaseModel
-from app.history.store import get_history_store
+from history.store import get_history_store
 
 router = APIRouter()
+
 
 class HistoryResponse(BaseModel):
     content: list[ChatMessage]

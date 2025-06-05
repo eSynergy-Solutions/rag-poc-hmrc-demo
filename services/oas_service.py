@@ -5,14 +5,15 @@ from prance import ResolvingParser
 from openapi_schema_validator import OAS30Validator
 from typing import List, Optional, Any
 from pydantic import BaseModel
-from app.core.logging import logger
-from app.errors import OASValidationError
-from app.core.config import settings
+from core.logging import logger
+from errors import OASValidationError
+from core.config import settings
 
 # Import AzureOpenAI at module scope so tests can monkey-patch it
 try:
     from openai import AzureOpenAI
 except ImportError:
+
     class AzureOpenAI:
         def __init__(self, azure_endpoint: str, api_key: str, api_version: str):
             raise RuntimeError(
@@ -42,8 +43,7 @@ class OASService:
             spec: Any = parser.specification
         except Exception as e:
             logger.warning(
-                "ResolvingParser failed, falling back to yaml.safe_load",
-                error=str(e)
+                "ResolvingParser failed, falling back to yaml.safe_load", error=str(e)
             )
             try:
                 spec = yaml.safe_load(spec_str)
@@ -91,7 +91,9 @@ class OASService:
                     # Safely retrieve credentials (or empty string)
                     endpoint = str(getattr(settings, "AZURE_OPENAI_ENDPOINT", "") or "")
                     api_key = getattr(settings, "AZURE_OPENAI_API_KEY", "") or ""
-                    deployment = getattr(settings, "AZURE_OPENAI_DEPLOYMENT_OAS", "") or ""
+                    deployment = (
+                        getattr(settings, "AZURE_OPENAI_DEPLOYMENT_OAS", "") or ""
+                    )
 
                     llm_client = llm_cls(
                         azure_endpoint=endpoint,
@@ -107,16 +109,23 @@ class OASService:
                     )
 
                     # Always use the callable chain form to invoke FakeAzureOpenAI correctly
-                    resp = llm_client.chat().completions().create(
-                        model=deployment,
-                        messages=[
-                            {"role": "system", "content": "You are an OAS validator."},
-                            {"role": "user", "content": human_prompt},
-                        ],
-                        temperature=0,
-                        max_tokens=1024,
-                        n=1,
-                        stop=None,
+                    resp = (
+                        llm_client.chat()
+                        .completions()
+                        .create(
+                            model=deployment,
+                            messages=[
+                                {
+                                    "role": "system",
+                                    "content": "You are an OAS validator.",
+                                },
+                                {"role": "user", "content": human_prompt},
+                            ],
+                            temperature=0,
+                            max_tokens=1024,
+                            n=1,
+                            stop=None,
+                        )
                     )
 
                     diff_html = resp.choices[0].message.content

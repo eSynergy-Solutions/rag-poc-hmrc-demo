@@ -2,11 +2,11 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
-from app.models.chat import QueryRequest
-from app.services.oas_service import OASService, ValidationReport
-from app.core.deps import get_settings
-from app.errors import OASValidationError, ChatServiceError
-from app.llm.chat_chain import build_chat_chain  # for future LLM-based path
+from models.chat import QueryRequest
+from services.oas_service import OASService, ValidationReport
+from core.deps import get_settings
+from errors import OASValidationError, ChatServiceError
+from llm.chat_chain import build_chat_chain  # for future LLM-based path
 from fastapi import status
 
 router = APIRouter()
@@ -45,7 +45,9 @@ def oas_check(
 
         # If valid but diff_html is provided, return it
         if report.diff_html:
-            return HTMLResponse(content=report.diff_html, status_code=status.HTTP_200_OK)
+            return HTMLResponse(
+                content=report.diff_html, status_code=status.HTTP_200_OK
+            )
 
         # Otherwise, success message
         return HTMLResponse(

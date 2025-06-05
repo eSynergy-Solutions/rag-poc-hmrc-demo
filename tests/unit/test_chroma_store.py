@@ -5,10 +5,11 @@ import shutil
 import pytest
 import tempfile
 
-from app.vectorstore.chroma import ChromaStore
-from app.models.ingest import Chunk
+from vectorstore.chroma import ChromaStore
+from models.ingest import Chunk
 
 import numpy as np
+
 
 @pytest.fixture(autouse=True)
 def patch_get_embedding(monkeypatch):
@@ -19,6 +20,7 @@ def patch_get_embedding(monkeypatch):
       - else zeros
     We only care about cosine distances, so a 2-D vector suffices.
     """
+
     def fake_get_embedding(text: str):
         if text.startswith("alpha"):
             return [1.0, 0.0]
@@ -26,16 +28,18 @@ def patch_get_embedding(monkeypatch):
             return [0.0, 1.0]
         return [0.0, 0.0]
 
-    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "dummy")    # used by get_embedding import
+    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "dummy")  # used by get_embedding import
     monkeypatch.setenv("AZURE_OPENAI_API_KEY", "dummy")
     monkeypatch.setenv("AZURE_OPENAI_DEPLOYMENT", "dummy")
     # Reload the embeddings module so that _azure_client initialization does not break
     import importlib
     import app.llm.embeddings as emb_mod
+
     importlib.reload(emb_mod)
 
     monkeypatch.setattr(emb_mod, "get_embedding", fake_get_embedding)
     yield
+
 
 @pytest.fixture
 def tmp_chroma_dir(tmp_path):
@@ -48,6 +52,7 @@ def tmp_chroma_dir(tmp_path):
     # cleanup is automatic with tmp_path, but explicit in case
     if os.path.isdir(str(d)):
         shutil.rmtree(str(d), ignore_errors=True)
+
 
 def test_chroma_upsert_and_query(tmp_chroma_dir):
     """
@@ -78,10 +83,11 @@ def test_chroma_upsert_and_query(tmp_chroma_dir):
     assert "alpha first document" in results[0].content
 
     # The second in ranking should be the “beta” or “something else” whichever close
-    # Because "beta"→[0,1], its dot with [1,0] is 0, same as something else→[0,0], but 
+    # Because "beta"→[0,1], its dot with [1,0] is 0, same as something else→[0,0], but
     # Chroma might tie-break arbitrarily. We check no exceptions and that the items are from our set:
     returned_paths = {c.path for c in results}
     assert "path1" in returned_paths
+
 
 def test_chroma_delete(tmp_chroma_dir):
     """

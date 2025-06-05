@@ -4,7 +4,8 @@ import pytest
 from langchain.schema import BaseRetriever
 from langchain.chains import RetrievalQA
 
-from app.llm.chat_chain import build_chat_chain
+from llm.chat_chain import build_chat_chain
+
 
 class DummyRetriever(BaseRetriever):
     def __init__(self):
@@ -13,6 +14,7 @@ class DummyRetriever(BaseRetriever):
     def get_relevant_documents(self, query: str):
         return []
 
+
 def test_build_chat_chain_returns_RetrievalQA(monkeypatch):
     """
     Verify that build_chat_chain(...) returns a RetrievalQA whose retriever
@@ -20,9 +22,12 @@ def test_build_chat_chain_returns_RetrievalQA(monkeypatch):
     """
 
     # Monkey-patch AzureChatOpenAI so that it doesn’t try to connect.
-    from app.llm.chat_chain import AzureChatOpenAI
+    from llm.chat_chain import AzureChatOpenAI
+
     class FakeLLM:
-        def __init__(SELF, azure_deployment, azure_endpoint, openai_api_key, temperature, verbose):
+        def __init__(
+            SELF, azure_deployment, azure_endpoint, openai_api_key, temperature, verbose
+        ):
             # Just store the parameters, but no network calls
             SELF.deployment = azure_deployment
             SELF.endpoint = azure_endpoint
@@ -40,7 +45,7 @@ def test_build_chat_chain_returns_RetrievalQA(monkeypatch):
         endpoint="https://dummy.endpoint",
         api_key="dummy-key",
         deployment="dummy-deploy",
-        retriever=dummy_r
+        retriever=dummy_r,
     )
 
     assert isinstance(chain, RetrievalQA)

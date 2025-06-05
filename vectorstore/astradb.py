@@ -3,10 +3,10 @@
 from typing import List, Dict, Any
 from astrapy import DataAPIClient
 from langchain.schema import BaseRetriever, Document
-from app.vectorstore.interface import VectorStore
-from app.models.ingest import Chunk
-from app.llm.embeddings import get_embedding
-from app.errors import StorageError
+from vectorstore.interface import VectorStore
+from models.ingest import Chunk
+from llm.embeddings import get_embedding
+from errors import StorageError
 
 
 class AstraStore(VectorStore):
@@ -39,12 +39,14 @@ class AstraStore(VectorStore):
             docs: List[Dict[str, Any]] = []
             for chunk in chunks:
                 vector = get_embedding(chunk.content)
-                docs.append({
-                    "path": chunk.path,
-                    "content": chunk.content,
-                    "chunk_index": chunk.chunk_index,
-                    "$vector": vector,
-                })
+                docs.append(
+                    {
+                        "path": chunk.path,
+                        "content": chunk.content,
+                        "chunk_index": chunk.chunk_index,
+                        "$vector": vector,
+                    }
+                )
 
             self._collection.insert_many(docs)
             return len(docs)
@@ -116,6 +118,8 @@ class AstraStore(VectorStore):
                         )
                     return docs
                 except Exception as e:
-                    raise StorageError(f"AstraRetriever.get_relevant_documents failed: {e}")
+                    raise StorageError(
+                        f"AstraRetriever.get_relevant_documents failed: {e}"
+                    )
 
         return _AstraRetriever(self, k)

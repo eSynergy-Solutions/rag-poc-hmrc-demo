@@ -2,12 +2,13 @@
 
 import asyncio
 from typing import List
-from app.ingestion.client import APIOfAPIsClient
-from app.ingestion.chunker import chunk_spec
-from app.vectorstore.interface import VectorStore
-from app.models.ingest import IngestionReport
-from app.core.logging import logger
-from app.errors import FetchError, StorageError
+from ingestion.client import APIOfAPIsClient
+from ingestion.chunker import chunk_spec
+from vectorstore.interface import VectorStore
+from models.ingest import IngestionReport
+from core.logging import logger
+from errors import FetchError, StorageError
+
 
 class IngestionService:
     """
@@ -58,7 +59,9 @@ class IngestionService:
                     # Catch unexpected exceptions from upsert
                     err_msg = f"{path}: Unexpected storage failure: {e_inner}"
                     errors.append(err_msg)
-                    logger.error("Error upserting chunks", path=path, error=str(e_inner))
+                    logger.error(
+                        "Error upserting chunks", path=path, error=str(e_inner)
+                    )
             except Exception as e_chunk:
                 # If chunking itself fails, record an error
                 err_msg = f"{path}: Chunking error: {e_chunk}"

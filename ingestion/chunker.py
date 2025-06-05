@@ -3,7 +3,7 @@
 import json
 import yaml
 from typing import List, Any
-from app.models.ingest import Chunk
+from models.ingest import Chunk
 
 # Maximum characters per chunk (approximate guidance for embedding token limits)
 MAX_CHUNK_SIZE = 3000

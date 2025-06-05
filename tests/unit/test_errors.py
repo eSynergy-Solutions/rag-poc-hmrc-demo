@@ -1,7 +1,7 @@
 # app/tests/unit/test_errors.py
 
 import pytest
-from app.errors import StorageError, OASValidationError, ChatServiceError, FetchError
+from errors import StorageError, OASValidationError, ChatServiceError, FetchError
 
 
 def test_storage_error_message_and_attributes():

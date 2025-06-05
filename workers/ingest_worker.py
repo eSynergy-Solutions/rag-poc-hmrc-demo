@@ -2,11 +2,11 @@
 
 import asyncio
 from celery import Celery
-from app.ingestion.client import APIOfAPIsClient
-from app.ingestion.service import IngestionService
-from app.vectorstore.astradb import AstraStore
-from app.core.config import settings
-from app.core.logging import logger
+from ingestion.client import APIOfAPIsClient
+from ingestion.service import IngestionService
+from vectorstore.astradb import AstraStore
+from core.config import settings
+from core.logging import logger
 
 # -------------------------------------------------------------------------------
 # Celery configuration
@@ -24,6 +24,7 @@ celery_app = Celery(
     backend=getattr(settings, "CELERY_RESULT_BACKEND", None),
 )
 
+
 # -------------------------------------------------------------------------------
 # Celery task
 # -------------------------------------------------------------------------------
@@ -34,6 +35,7 @@ def run_ingestion_job_task():
     This will call the async function `run_ingestion_job()` via asyncio.
     """
     asyncio.run(run_ingestion_job())
+
 
 async def run_ingestion_job():
     """
@@ -54,8 +56,9 @@ async def run_ingestion_job():
     logger.info(
         "Ingestion job completed",
         upserted_count=report.upserted_count,
-        errors=report.errors
+        errors=report.errors,
     )
+
 
 # Expose a `.delay()` attribute on run_ingestion_job so that tests expecting
 # a Celery‐style task can do `run_ingestion_job.delay()`.

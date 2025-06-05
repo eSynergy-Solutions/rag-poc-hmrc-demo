@@ -1,5 +1,6 @@
 import pytest
-from app.ingestion.chunker import chunk_spec, MAX_CHUNK_SIZE
+from ingestion.chunker import chunk_spec, MAX_CHUNK_SIZE
+
 
 def test_chunk_spec_with_empty_string():
     # An empty string is valid YAML → safe_load returns None → yaml.safe_dump(None) == "null\n"
@@ -9,6 +10,7 @@ def test_chunk_spec_with_empty_string():
     assert chunks[0].content == "null\n"
     assert chunks[0].chunk_index == 0
 
+
 def test_chunk_spec_with_empty_dict():
     # A dict → JSON dumped to "{}" → safe_load("{})") → {} → yaml.safe_dump → "{}\n"
     chunks = chunk_spec("d", {})
@@ -16,6 +18,7 @@ def test_chunk_spec_with_empty_dict():
     assert chunks[0].path == "d"
     assert chunks[0].content == "{}\n"
     assert chunks[0].chunk_index == 0
+
 
 def test_chunk_spec_with_invalid_yaml():
     # Invalid YAML → safe_load raises → fallback to original text
@@ -25,6 +28,7 @@ def test_chunk_spec_with_invalid_yaml():
     assert chunks[0].path == "bad"
     assert chunks[0].content == bad
     assert chunks[0].chunk_index == 0
+
 
 def test_chunk_spec_large_document():
     # Generate a string larger than 2× MAX_CHUNK_SIZE + 100

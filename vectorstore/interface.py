@@ -2,7 +2,7 @@
 
 from typing import Protocol, List, Dict, Any
 from langchain.schema import BaseRetriever
-from app.models.ingest import Chunk
+from models.ingest import Chunk
 
 
 class VectorStore(Protocol):

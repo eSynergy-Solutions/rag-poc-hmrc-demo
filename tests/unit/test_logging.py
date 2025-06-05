@@ -2,7 +2,8 @@
 
 import json
 import structlog
-from app.core.logging import logger
+from core.logging import logger
+
 
 def test_logger_emits_json(capsys):
     # Emit a log event

@@ -6,9 +6,9 @@ FastAPI application factory and router registration.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import chat, discover, oas, health, history, test
-from app.core.logging import logger
-from app.core.config import settings
+from api.v1 import chat, discover, oas, health, history, test
+from core.logging import logger
+from core.config import settings
 
 
 def build_api() -> FastAPI:
@@ -37,11 +37,11 @@ def build_api() -> FastAPI:
 
     # ---- routers ----------------------------------------------------------
     app.include_router(health.router, prefix="/v1", tags=["health"])
-    app.include_router(chat.router,   prefix="/v1", tags=["chat"])
+    app.include_router(chat.router, prefix="/v1", tags=["chat"])
     app.include_router(discover.router, prefix="/v1", tags=["discover"])
-    app.include_router(oas.router,     prefix="/v1", tags=["oas"])
+    app.include_router(oas.router, prefix="/v1", tags=["oas"])
     app.include_router(history.router, prefix="/v1", tags=["history"])
-    app.include_router(test.router,    prefix="/v1", tags=["test"])
+    app.include_router(test.router, prefix="/v1", tags=["test"])
 
     logger.info(
         "FastAPI app initialized",

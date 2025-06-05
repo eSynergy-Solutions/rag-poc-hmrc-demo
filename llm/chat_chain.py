@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 from langchain_community.chat_models import AzureChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.schema import BaseRetriever
-from app.llm.prompts import standard_rag_system_prompt
+from llm.prompts import standard_rag_system_prompt
 
 
 def build_chat_chain(

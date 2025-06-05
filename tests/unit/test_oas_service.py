@@ -3,8 +3,8 @@
 import pytest
 import yaml
 import importlib
-from app.services.oas_service import OASService, ValidationReport
-from app.errors import OASValidationError
+from services.oas_service import OASService, ValidationReport
+from errors import OASValidationError
 from openapi_schema_validator import OAS30Validator
 
 
@@ -16,8 +16,9 @@ def clear_feature_flags(monkeypatch):
     """
     # Reload config so we have a fresh Settings instance
     import app.core.config as config_mod
+
     importlib.reload(config_mod)
-    from app.core.config import settings
+    from core.config import settings
 
     # Backup existing flags (though after reload, this is a new Settings)
     orig_flags = settings.FEATURE_FLAGS.copy()
@@ -106,12 +107,14 @@ def test_llm_based_diff_applies_when_flag_set(monkeypatch):
     """
     # 1) Reload config and oas_service so settings inside oas_service is fresh
     import app.core.config as config_mod
+
     importlib.reload(config_mod)
-    from app.core.config import settings
+    from core.config import settings
 
     import app.services.oas_service as oas_mod
+
     importlib.reload(oas_mod)
-    from app.services.oas_service import OASService
+    from services.oas_service import OASService
 
     # Enable the feature flag on the fresh settings
     settings.FEATURE_FLAGS.clear()

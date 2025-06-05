@@ -2,13 +2,14 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from app.models.chat import QueryRequest, QueryResponse, ChatMessage
-from app.services.rag_service import RAGService
-from app.core.deps import get_chat_chain
-from app.history.store import get_history_store   # for stateful history
-from app.errors import ChatServiceError
+from models.chat import QueryRequest, QueryResponse, ChatMessage
+from services.rag_service import RAGService
+from core.deps import get_chat_chain
+from history.store import get_history_store  # for stateful history
+from errors import ChatServiceError
 
 router = APIRouter()
+
 
 @router.post("/discover", response_model=QueryResponse)
 def discover(
@@ -34,8 +35,7 @@ def discover(
     # 4) Handle streaming (not yet implemented)
     if payload.streaming:
         raise HTTPException(
-            status_code=501,
-            detail="Streaming not implemented for discovery"
+            status_code=501, detail="Streaming not implemented for discovery"
         )
 
     # 5) Non‐streaming: call the RAG service

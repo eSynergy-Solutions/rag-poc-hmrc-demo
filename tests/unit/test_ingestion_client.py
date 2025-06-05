@@ -5,8 +5,8 @@ import httpx
 import asyncio
 from respx import mock
 from httpx import Response, RequestError
-from app.ingestion.client import APIOfAPIsClient
-from app.errors import FetchError
+from ingestion.client import APIOfAPIsClient
+from errors import FetchError
 
 # We will use respx to mock httpx.AsyncClient.get and test retry logic.
 

@@ -4,20 +4,23 @@ import os
 import pytest
 from pydantic import ValidationError
 
-from app.core.config import Settings, settings
+from core.config import Settings, settings
+
 
 def test_default_settings_load(tmp_path, monkeypatch):
     # 1) Create a temporary .env file with just the six “required” keys:
     env_file = tmp_path / ".env"
     env_file.write_text(
-        "\n".join([
-            "AZURE_OPENAI_ENDPOINT=https://example.com",
-            "AZURE_OPENAI_API_KEY=secret-key",
-            "AZURE_OPENAI_DEPLOYMENT=deployment-name",
-            "AZURE_OPENAI_DEPLOYMENT_OAS=oas-deployment",
-            "ASTRA_DB_APPLICATION_TOKEN=token-value",
-            "ASTRA_DB_API_ENDPOINT=https://astra.example.com",
-        ])
+        "\n".join(
+            [
+                "AZURE_OPENAI_ENDPOINT=https://example.com",
+                "AZURE_OPENAI_API_KEY=secret-key",
+                "AZURE_OPENAI_DEPLOYMENT=deployment-name",
+                "AZURE_OPENAI_DEPLOYMENT_OAS=oas-deployment",
+                "ASTRA_DB_APPLICATION_TOKEN=token-value",
+                "ASTRA_DB_API_ENDPOINT=https://astra.example.com",
+            ]
+        )
     )
 
     # 2) Move into that empty directory so that BaseSettings will read this .env
@@ -31,7 +34,7 @@ def test_default_settings_load(tmp_path, monkeypatch):
         "AZURE_OPENAI_DEPLOYMENT_OAS",
         "ASTRA_DB_APPLICATION_TOKEN",
         "ASTRA_DB_API_ENDPOINT",
-        "ASTRA_DB_KEYSPACE",            # ← Also remove this so the default applies
+        "ASTRA_DB_KEYSPACE",  # ← Also remove this so the default applies
     ]:
         monkeypatch.delenv(var, raising=False)
 

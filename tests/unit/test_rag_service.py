@@ -1,10 +1,12 @@
 import pytest
-from app.services.rag_service import RAGService
-from app.models.chat import ChatMessage
+from services.rag_service import RAGService
+from models.chat import ChatMessage
+
 
 class DummyDoc:
     def __init__(self, metadata):
         self.metadata = metadata
+
 
 class DummyChain:
     def __init__(self, output):
@@ -13,6 +15,7 @@ class DummyChain:
     def __call__(self, inputs):
         # simulate RetrievalQA behaviour
         return self.output
+
 
 def test_rag_service_with_dict_output():
     # simulate a dict‐style chain output
@@ -25,6 +28,7 @@ def test_rag_service_with_dict_output():
     # we extract the metadata only
     assert sources == [{"foo": "bar"}, {"baz": 123}]
 
+
 def test_rag_service_with_string_output():
     # simulate a chain that returns a plain string
     service = RAGService(chain=DummyChain("just a plain string"))
@@ -32,6 +36,7 @@ def test_rag_service_with_string_output():
     assert answer == "just a plain string"
     # string outputs get no sources
     assert sources == []
+
 
 def test_rag_service_raises_on_chain_error():
     # simulate an LLM error bubbling up

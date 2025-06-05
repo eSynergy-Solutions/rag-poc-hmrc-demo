@@ -2,8 +2,9 @@
 
 from threading import Lock
 from typing import Dict, List
-from app.models.chat import ChatMessage
-from app.errors import StorageError
+from models.chat import ChatMessage
+from errors import StorageError
+
 
 class InMemoryHistoryStore:
     """
@@ -61,6 +62,7 @@ class InMemoryHistoryStore:
 # Singleton instance and accessor ------------------------------------------------
 
 _history_store_instance: InMemoryHistoryStore = InMemoryHistoryStore()
+
 
 def get_history_store() -> InMemoryHistoryStore:
     """

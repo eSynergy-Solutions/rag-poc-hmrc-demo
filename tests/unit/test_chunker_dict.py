@@ -1,7 +1,8 @@
 # app/tests/unit/test_chunker_dict.py
 
 import yaml
-from app.ingestion.chunker import chunk_spec
+from ingestion.chunker import chunk_spec
+
 
 def test_chunk_spec_with_dict():
     """

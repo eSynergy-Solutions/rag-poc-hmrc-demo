@@ -2,11 +2,12 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app
-from app.core.deps import get_chat_chain
-from app.models.chat import ChatMessage
-from app.history.store import get_history_store
-from app.errors import ChatServiceError
+from main import app
+from core.deps import get_chat_chain
+from models.chat import ChatMessage
+from history.store import get_history_store
+from errors import ChatServiceError
+
 
 # -----------------------------------------------------------------------------------
 # DummyChain definitions for overriding get_chat_chain dependency.
@@ -25,6 +26,7 @@ class DummyStreamChain:
             yield "chunk1-"
             yield "chunk2-"
             yield "chunk3"
+
         return streamer()
 
 
@@ -220,7 +222,9 @@ def test_oas_check_malformed_yaml_returns_400():
     assert resp.status_code == 400
     assert "Specification Validation Failed" in resp.text
     # Should mention parse failure
-    assert "Failed to parse spec" in resp.text or "paths: must be an object" in resp.text
+    assert (
+        "Failed to parse spec" in resp.text or "paths: must be an object" in resp.text
+    )
 
 
 def test_oas_check_minimal_valid_spec_returns_200():
@@ -274,7 +278,8 @@ def test_get_history_after_chats_returns_messages():
 # 8) Non-existent routes under /v1 should return 404
 # -----------------------------------------------------------------------------------
 @pytest.mark.parametrize(
-    "method, path", [("GET", "/v1/nonexistent"), ("POST", "/v1/foo_bar"), ("PUT", "/v1/chat/extra")]
+    "method, path",
+    [("GET", "/v1/nonexistent"), ("POST", "/v1/foo_bar"), ("PUT", "/v1/chat/extra")],
 )
 def test_unknown_v1_routes_return_404(method, path):
     client = TestClient(app)

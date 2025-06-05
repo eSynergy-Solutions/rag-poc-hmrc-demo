@@ -16,7 +16,9 @@ except ImportError:
                 "Please install openai>=1.x to use get_embedding."
             )
 
-from app.core.config import settings
+
+from core.config import settings
+
 
 @lru_cache(maxsize=1024)
 def get_embedding(text: str) -> List[float]:
