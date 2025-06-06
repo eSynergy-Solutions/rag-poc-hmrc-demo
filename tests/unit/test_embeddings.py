@@ -3,7 +3,7 @@
 import pytest
 from functools import partial
 
-import app.llm.embeddings as emb_mod
+import llm.embeddings as emb_mod
 
 class DummyEmbeddingResponse:
     """

@@ -23,7 +23,7 @@ def run_seed_script(fake_spec_dir: Path, monkeypatch):
     monkeypatch.setenv("ASTRA_DB_API_ENDPOINT", "https://dummy.astra")
 
     # 2) Monkey-patch AstraStore so that upsert returns len(chunks) but does not connect
-    import app.vectorstore.astradb as astradb_mod
+    import vectorstore.astradb as astradb_mod
 
     class FakeAstraStore:
         def __init__(SELF, token, api_endpoint, keyspace, collection_name):

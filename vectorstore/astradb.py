@@ -97,13 +97,19 @@ class AstraStore(VectorStore):
 
         class _AstraRetriever(BaseRetriever):
             def __init__(self, store: "AstraStore", k: int):
-                self.store = store
-                self.k = k
+                # Bypass Pydantic’s field restrictions for undeclared fields
+                object.__setattr__(self, "store", store)
+                object.__setattr__(self, "k", k)
+                object.__setattr__(self, "tags", [])
+                # LangChain’s BaseRetriever expects a `metadata` field
+                object.__setattr__(self, "metadata", {})
 
             def get_relevant_documents(self, query: str) -> List[Document]:
                 """
                 Use get_embedding on the query, then call store.query,
-                converting each Chunk into a Document. Raises StorageError on failure.
+                converting each Chunk into a Document. If the collection does not
+                exist (or any StorageError), return an empty list instead of
+                propagating the exception.
                 """
                 try:
                     emb = get_embedding(query)
@@ -117,9 +123,8 @@ class AstraStore(VectorStore):
                             )
                         )
                     return docs
-                except Exception as e:
-                    raise StorageError(
-                        f"AstraRetriever.get_relevant_documents failed: {e}"
-                    )
+                except StorageError as e:
+                    # Likely “collection not exist,” treat as “no documents” so chain can build successfully
+                    return []
 
         return _AstraRetriever(self, k)

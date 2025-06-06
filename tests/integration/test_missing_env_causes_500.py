@@ -6,8 +6,8 @@ import pytest
 from fastapi.testclient import TestClient
 from importlib import reload
 
-import app.main as main_mod
-import app.core.config as config_mod
+import main as main_mod
+import core.config as config_mod
 
 @pytest.fixture(autouse=True)
 def clear_env(monkeypatch):

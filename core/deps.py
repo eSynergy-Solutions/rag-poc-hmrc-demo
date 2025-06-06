@@ -47,7 +47,7 @@ def get_embedding_fn(
     config=Depends(get_settings),
 ) -> Generator:
     # Yield the single canonical function object from llm.embeddings
-    import app.llm.embeddings as _emb_mod
+    import llm.embeddings as _emb_mod
 
     yield _emb_mod.get_embedding
 

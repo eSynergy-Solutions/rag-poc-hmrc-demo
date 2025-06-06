@@ -33,7 +33,7 @@ def patch_get_embedding(monkeypatch):
     monkeypatch.setenv("AZURE_OPENAI_DEPLOYMENT", "dummy")
     # Reload the embeddings module so that _azure_client initialization does not break
     import importlib
-    import app.llm.embeddings as emb_mod
+    import llm.embeddings as emb_mod
 
     importlib.reload(emb_mod)
 

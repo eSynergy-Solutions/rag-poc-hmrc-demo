@@ -15,7 +15,7 @@ def clear_feature_flags(monkeypatch):
     unless explicitly set in the test.
     """
     # Reload config so we have a fresh Settings instance
-    import app.core.config as config_mod
+    import core.config as config_mod
 
     importlib.reload(config_mod)
     from core.config import settings
@@ -106,12 +106,12 @@ def test_llm_based_diff_applies_when_flag_set(monkeypatch):
     to the returned HTML. We simulate AzureOpenAI returning dummy content.
     """
     # 1) Reload config and oas_service so settings inside oas_service is fresh
-    import app.core.config as config_mod
+    import core.config as config_mod
 
     importlib.reload(config_mod)
     from core.config import settings
 
-    import app.services.oas_service as oas_mod
+    import services.oas_service as oas_mod
 
     importlib.reload(oas_mod)
     from services.oas_service import OASService

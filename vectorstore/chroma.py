@@ -107,8 +107,12 @@ class ChromaStore(VectorStore):
 
         class _ChromaRetriever(BaseRetriever):
             def __init__(self, store: "ChromaStore", k: int):
-                self.store = store
-                self.k = k
+                # Bypass Pydantic’s field restrictions for undeclared fields
+                object.__setattr__(self, "store", store)
+                object.__setattr__(self, "k", k)
+                object.__setattr__(self, "tags", [])
+                # LangChain’s BaseRetriever expects a `metadata` field
+                object.__setattr__(self, "metadata", {})
 
             def get_relevant_documents(self, query: str) -> List[Document]:
                 """
