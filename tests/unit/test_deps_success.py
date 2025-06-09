@@ -6,8 +6,8 @@ import importlib
 from fastapi import HTTPException
 
 # Import the modules under test
-import app.core.config as config_mod
-import app.core.deps as deps_mod
+import core.config as config_mod
+import core.deps as deps_mod
 
 def reload_config_with_env(monkeypatch, **env):
     """

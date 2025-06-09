@@ -44,7 +44,7 @@ def test_get_vector_store_failure(monkeypatch):
     monkeypatch.setenv("ASTRA_DB_APPLICATION_TOKEN", "")
     # Reload settings singleton to pick up change
     from importlib import reload
-    import app.core.config as config_mod
+    import core.config as config_mod
 
     reload(config_mod)
     # Expect HTTPException due to init failure
@@ -57,7 +57,7 @@ def test_get_chat_chain_failure(monkeypatch):
     # Monkeypatch settings to invalid OpenAI config
     monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "")
     reload = __import__("importlib").reload
-    import app.core.config as config_mod
+    import core.config as config_mod
 
     reload(config_mod)
 

@@ -1,4 +1,4 @@
-# app/tests/unit/test_chat_chain_builder.py
+# tests/unit/test_chat_chain_builder.py
 
 import pytest
 from langchain.schema import BaseRetriever
@@ -22,7 +22,7 @@ def test_build_chat_chain_returns_RetrievalQA(monkeypatch):
     """
 
     # Monkey-patch AzureChatOpenAI so that it doesn’t try to connect.
-    from llm.chat_chain import AzureChatOpenAI
+    from llm.chat_chain import AzureChatOpenAI  # unchanged
 
     class FakeLLM:
         def __init__(
@@ -38,7 +38,8 @@ def test_build_chat_chain_returns_RetrievalQA(monkeypatch):
             # stub: never used
             raise AssertionError("LLM should not be called in builder test")
 
-    monkeypatch.setattr("app.llm.chat_chain.AzureChatOpenAI", FakeLLM)
+    # ← Changed this line to point at the real module path:
+    monkeypatch.setattr("llm.chat_chain.AzureChatOpenAI", FakeLLM)
 
     dummy_r = DummyRetriever()
     chain = build_chat_chain(
@@ -50,5 +51,4 @@ def test_build_chat_chain_returns_RetrievalQA(monkeypatch):
 
     assert isinstance(chain, RetrievalQA)
     # Under the hood, RetrievalQA.retriever should be exactly dummy_r
-    # (LangChain stores it as chain.retriever)
     assert getattr(chain, "retriever", None) is dummy_r

@@ -3,7 +3,6 @@
 from typing import Generator
 from fastapi import Depends, HTTPException
 
-from core.config import settings
 from core.logging import logger
 from llm.embeddings import get_embedding
 from llm.chat_chain import build_chat_chain
@@ -12,6 +11,12 @@ from vectorstore.astradb import AstraStore
 
 
 def get_settings() -> Generator:
+    """
+    Dynamically import and yield the latest Settings instance.
+    This ensures that after a reload(core.config), we pick up
+    None (or the updated Settings) as intended.
+    """
+    from core.config import settings
     yield settings
 
 
