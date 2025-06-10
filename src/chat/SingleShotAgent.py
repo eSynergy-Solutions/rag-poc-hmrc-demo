@@ -5,6 +5,9 @@ from src.chat.Chat import Chat
 from src.schemas.ChatSchemas import ChatMessage
 from typing import Generator, List, Union
 import logging
+import yaml
+import json
+from openapi_spec_validator import validate
 
 load_dotenv()
 
@@ -48,6 +51,42 @@ class SingleShotAgent(Chat):
             "role": "system",
             "content": [{"type": "text", "text": sysPromptContent}],
         }
+
+    def yaml_to_json(self, yaml_string):
+        """
+        Convert a YAML string to JSON string
+
+        Parameters:
+        yaml_string (str): The YAML content as a string
+
+        Returns:
+        str: The converted JSON string
+        """
+        try:
+            # Parse YAML string to Python dictionary
+            yaml_dict: dict = yaml.safe_load(yaml_string)
+            return yaml_dict
+        except Exception as e:
+            return f"Error converting YAML to JSON: {str(e)}"
+
+    def validate_oas_spec(self, oas_spec: dict) -> bool:
+        """
+        Validate an OpenAPI Specification (OAS) string.
+
+        Args:
+            oas_spec (dict): The OAS content as a dict.
+
+        Returns:
+            bool: True if the OAS is valid, False otherwise.
+        """
+        try:
+            # Parse the OAS spec
+            # Validate the OAS spec
+            validate(oas_spec)
+            return True
+        except Exception as e:
+            logger.error(f"OpenAPI Specification validation error: {e}")
+            return False
 
     def chat_query(
         self, chat_history: List[ChatMessage], streamed: bool = False
