@@ -7,17 +7,16 @@ import inspect
 import types
 import httpx  # for monkey-patching iter_content if needed
 
-from typing import Any
 from models.chat import QueryRequest, QueryResponse, ChatMessage
 from services.rag_service import RAGService
 from core.deps import get_chat_chain
 from history.store import get_history_store
 from errors import ChatServiceError
+from starlette.testclient import TestClient as _OrigTestClient
 
 router = APIRouter()
 
 # ─── Shim: let TestClient.post(...) accept a `stream` kwarg ──────────────────
-from starlette.testclient import TestClient as _OrigTestClient
 
 _orig_post = _OrigTestClient.post
 

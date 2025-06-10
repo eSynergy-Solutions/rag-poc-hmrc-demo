@@ -1,6 +1,6 @@
 # app/api/v1/discover.py
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Body
 from fastapi.responses import StreamingResponse
 from models.chat import QueryRequest, QueryResponse, ChatMessage
 from services.rag_service import RAGService
@@ -14,7 +14,7 @@ router = APIRouter()
 @router.post("/discover", response_model=QueryResponse)
 def discover(
     request: Request,
-    payload: QueryRequest,
+    payload: str = Body(..., media_type="text/plain"),
     chain=Depends(get_chat_chain),
 ):
     """
@@ -26,22 +26,22 @@ def discover(
 
     # 2) Record the incoming user message
     history_store = get_history_store()
-    user_msg = ChatMessage(role="user", content=payload.content)
+    user_msg = ChatMessage(role="user", content=payload)
     history_store.record_message(session_id, user_msg)
 
     # 3) Get entire history for this session
     history = history_store.get_history(session_id)
 
     # 4) Handle streaming (not yet implemented)
-    if payload.streaming:
-        raise HTTPException(
-            status_code=501, detail="Streaming not implemented for discovery"
-        )
+    # if payload.streaming:
+    #     raise HTTPException(
+    #         status_code=501, detail="Streaming not implemented for discovery"
+    #     )
 
     # 5) Non‐streaming: call the RAG service
     try:
         service = RAGService(chain)
-        answer_text, sources = service.retrieve_and_answer(history, payload.content)
+        answer_text, sources = service.retrieve_and_answer(history, payload)
     except ChatServiceError as e:
         raise HTTPException(status_code=502, detail=str(e))
     except Exception as e:

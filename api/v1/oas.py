@@ -1,12 +1,13 @@
 # app/api/v1/oas.py
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Body
 from fastapi.responses import HTMLResponse
-from models.chat import QueryRequest
 from services.oas_service import OASService, ValidationReport
 from core.deps import get_settings
 from errors import OASValidationError, ChatServiceError
-from llm.chat_chain import build_chat_chain  # for future LLM-based path
+import yaml
+
+# from llm.chat_chain import build_chat_chain  # for future LLM-based path
 from fastapi import status
 
 router = APIRouter()
@@ -15,7 +16,7 @@ router = APIRouter()
 @router.post("/oas-check", response_class=HTMLResponse)
 def oas_check(
     request: Request,
-    payload: QueryRequest,
+    payload: str = Body(..., media_type="text/plain"),
     settings=Depends(get_settings),
 ):
     """
@@ -24,7 +25,7 @@ def oas_check(
     Otherwise, run static JSON-Schema validation via OASService.
     """
 
-    spec_content = payload.content
+    spec_content = payload
 
     # If LLM-based OAS checking is turned on, route through a LangChain chain
     if "oas_llm" in settings.FEATURE_FLAGS:
