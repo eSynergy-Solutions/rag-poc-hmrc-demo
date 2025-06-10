@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from src.history.BasicHistory import BaseHistory
+from src.history.BasicHistory import BaseHistory, OneShotHistory
 from src.schemas.ChatSchemas import ChatMessage
 from src.chat.HMRCRag import HMRCRAG
 from src.chat.SingleShotAgent import SingleShotAgent
@@ -62,8 +62,8 @@ class HistoryResponse(BaseModel):
 
 
 HistoryObjectHMRC = BaseHistory()
-HistoryObjectOASChecker = BaseHistory()
-HistoryObjectDiscovery = BaseHistory()
+HistoryObjectOASChecker = OneShotHistory()    # one-shot: only last message used
+HistoryObjectDiscovery = OneShotHistory()     # one-shot: only last message used
 logger.info("HistoryObject initialized.")
 
 ChatObjectHmrcApiAgent: HMRCRAG = HMRCRAG()

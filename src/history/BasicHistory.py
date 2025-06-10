@@ -30,3 +30,20 @@ class BaseHistory:
         In the BaseHistory class this just returns the full history
         """
         return self.get_history()
+
+
+class OneShotHistory(BaseHistory):
+    """
+    A History implementation for one-shot endpoints (OAS-checker, discovery).
+    Always returns only the most recent user message as context.
+    """
+
+    def get_context_history(self) -> list[ChatMessage]:
+        """
+        Return only the most recent user message as context.
+        Scan history in reverse to find the last ChatMessage(role='user').
+        """
+        for msg in reversed(self._history):
+            if msg.role == "user":
+                return [msg]
+        return []

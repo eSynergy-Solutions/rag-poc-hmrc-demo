@@ -52,6 +52,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+prompt_ignore.txt
 *.cover
 *.py,cover
 .hypothesis/
