@@ -1,13 +1,12 @@
 # app/services/rag_service.py
 
 from typing import Tuple, List, Optional
-from langchain.chains import RetrievalQA
-from core.logging import logger
+from langchain.chains.retrieval_qa.base import RetrievalQA
 from models.chat import ChatMessage
-from errors import ChatServiceError
+from abstracts.ServiceRag import ServiceRag
 
 
-class RAGService:
+class RAGService(ServiceRag):
     """
     High-level façade for RAG-based chat interactions.
     Can be initialized with an optional system_prompt to adjust “flavor.”

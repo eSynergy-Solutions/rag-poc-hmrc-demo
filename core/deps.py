@@ -5,9 +5,12 @@ from fastapi import Depends, HTTPException
 
 from core.logging import logger
 from llm.embeddings import get_embedding
+from langchain_community.chat_models import AzureChatOpenAI
 from llm.chat_chain import build_chat_chain
 from vectorstore.interface import VectorStore
 from vectorstore.astradb import AstraStore
+import os
+from core.config import settings
 
 
 def get_settings() -> Generator:
@@ -16,7 +19,7 @@ def get_settings() -> Generator:
     This ensures that after a reload(core.config), we pick up
     None (or the updated Settings) as intended.
     """
-    from core.config import settings
+
     yield settings
 
 
@@ -84,3 +87,44 @@ def get_chat_chain(
     except Exception as e:
         logger.error("Failed to build chat chain", error=str(e))
         raise HTTPException(status_code=500, detail="Chat chain unavailable")
+
+
+def get_chat_service(
+    config=settings,
+) -> AzureChatOpenAI:
+    """
+    Provides a chat service that does not require a vector store.
+    This is useful for scenarios where chat capabilities are needed
+    without retrieval from a vector store.
+    """
+    if config is None:
+        raise HTTPException(status_code=500, detail="Chat chain unavailable")
+
+    api_version = os.getenv("OPENAI_API_VERSION", None)
+    if api_version is None:
+        raise ValueError(
+            "OPENAI_API_VERSION environment variable must be set for AzureChatOpenAI"
+        )
+
+    # explicit sanity check for required config
+    if (
+        not config.AZURE_OPENAI_ENDPOINT
+        or not config.AZURE_OPENAI_API_KEY
+        or not config.AZURE_OPENAI_DEPLOYMENT
+    ):
+        raise HTTPException(status_code=500, detail="Chat chain unavailable")
+
+    try:
+        llm = AzureChatOpenAI(
+            azure_deployment=config.AZURE_OPENAI_DEPLOYMENT,
+            azure_endpoint=str(config.AZURE_OPENAI_ENDPOINT),
+            openai_api_key=config.AZURE_OPENAI_API_KEY,
+            api_version=api_version,
+            temperature=0.2,
+            verbose=False,
+        )
+
+        return llm
+    except Exception as e:
+        logger.error("Failed to initialise Azure client", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to initialise Azure client")

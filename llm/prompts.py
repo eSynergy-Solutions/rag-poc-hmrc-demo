@@ -14,8 +14,8 @@ standard_rag_system_prompt = PromptTemplate(
     input_variables=["history", "context"],
 )
 
-# OAS checker system prompt
-oas_checker_prompt = PromptTemplate(
+# OAS validator system prompt
+oas_validator_prompt = PromptTemplate(
     template=(
         "You are a helpful assistant that checks Open API Specification files for errors and best-practices.\n\n"
         "In addition to checking standard OAS syntax, also check for the fields that are mandatory for our use case "
@@ -49,6 +49,6 @@ discovery_prompt_v2 = PromptTemplate(
 # Prompt registry for easy experiments
 PROMPT_REGISTRY = {
     "rag": standard_rag_system_prompt,
-    "oas_checker": oas_checker_prompt,
+    "oas_checker": oas_validator_prompt,
     "discover_v2": discovery_prompt_v2,
 }

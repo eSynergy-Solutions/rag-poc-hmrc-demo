@@ -2,12 +2,16 @@
 
 import yaml
 from prance import ResolvingParser
-from openapi_schema_validator import OAS30Validator
+from openapi_spec_validator import validate
 from typing import List, Optional, Any
-from pydantic import BaseModel
 from core.logging import logger
+from core.deps import get_chat_service
 from errors import OASValidationError
 from core.config import settings
+from models.oas import ValidationReport
+from abstracts.ServiceOas import ServiceOAS
+from llm.prompts import PROMPT_REGISTRY
+from langchain_core.messages import HumanMessage, SystemMessage
 
 # Import AzureOpenAI at module scope so tests can monkey-patch it
 try:
@@ -22,13 +26,7 @@ except ImportError:
             )
 
 
-class ValidationReport(BaseModel):
-    valid: bool
-    errors: List[str]
-    diff_html: Optional[str] = None
-
-
-class OASService:
+class OASService(ServiceOAS):
     """
     Service for validating (and optionally diffing) OpenAPI Specification content.
     - Performs YAML parsing fallback
@@ -36,103 +34,65 @@ class OASService:
     - If "oas_llm" is in settings.FEATURE_FLAGS, calls Azure OpenAI to produce an HTML diff.
     """
 
-    def validate_spec(self, spec_str: str) -> ValidationReport:
-        # 1. Attempt full ResolvingParser; if that fails, fallback to yaml.safe_load
-        try:
-            parser = ResolvingParser(spec_string=spec_str)
-            spec: Any = parser.specification
-        except Exception as e:
-            logger.warning(
-                "ResolvingParser failed, falling back to yaml.safe_load", error=str(e)
-            )
-            try:
-                spec = yaml.safe_load(spec_str)
-            except Exception as e2:
-                msg = f"Failed to parse spec: {e2}"
-                logger.error(msg)
-                raise OASValidationError(errors=[msg])
+    def yaml_to_json(self, yaml_string):
+        """
+        Convert a YAML string to JSON string
 
-        # 1b. Ensure we have an 'openapi' field
-        if not isinstance(spec, dict) or "openapi" not in spec:
-            msg = "Missing required 'openapi' field"
+        Parameters:
+        yaml_string (str): The YAML content as a string
+
+        Returns:
+        str: The converted JSON string
+        """
+        try:
+            # Parse YAML string to Python dictionary
+            yaml_dict: dict = yaml.safe_load(yaml_string)
+            return yaml_dict
+        except Exception as e:
+            return f"Error converting YAML to JSON: {str(e)}"
+
+    def validate_spec(self, oas_spec: dict) -> ValidationReport:
+        """
+        Validate an OpenAPI Specification (OAS) string.
+
+        Args:
+            oas_spec (dict): The OAS content as a dict.
+
+        Returns:
+            bool: True if the OAS is valid, False otherwise.
+        """
+        try:
+            # Parse the OAS spec
+            # Validate the OAS spec
+            validate(oas_spec)
+            return True
+        except Exception as e:
+            logger.error(f"OpenAPI Specification validation error: {e}")
+            return False
+
+    def enforce_specific_fields(self, field: str, spec: dict) -> bool:
+        if field not in spec:
+            msg = f"Missing required {field} field"
             logger.error(msg)
-            raise OASValidationError(errors=[msg])
+            return False
+        return True
 
-        # 1c/1d. Collect any path-structure errors
-        errors: List[str] = []
-        paths = spec.get("paths")
-        if not isinstance(paths, dict):
-            errors.append("paths: must be an object")
-        else:
-            for name, item in paths.items():
-                if not isinstance(item, dict):
-                    errors.append(f"paths.{name}: must be an object")
+    def run_oas_check_llm(self, oas_spec: dict) -> str:
+        llm_instance = get_chat_service()
+        if not llm_instance:
+            raise RuntimeError("Chat service is not available")
+        # Prepare the system prompt
+        system_prompt = PROMPT_REGISTRY.get(
+            "oas_validator_prompt", "Default OAS Check Prompt"
+        )
+        if not system_prompt:
+            raise RuntimeError("OAS validation prompt not found in registry")
 
-        # 2. Run JSON-Schema validation
-        try:
-            validator = OAS30Validator(spec)
-            schema_errors = [
-                f"{err.path}: {err.message}" for err in validator.iter_errors(spec)
-            ]
-            errors.extend(schema_errors)
-        except Exception as e:
-            logger.error(f"Schema validation error: {e}")
-            errors.append(f"Schema validation error: {e}")
-
-        # 3. If there are any errors, optionally run an LLM-based diff
-        if errors:
-            # Check FEATURE_FLAGS; settings should be a Settings instance at this point
-            use_llm = "oas_llm" in (getattr(settings, "FEATURE_FLAGS", []) or [])
-            diff_html: Optional[str] = None
-
-            if use_llm:
-                try:
-                    llm_cls = globals()["AzureOpenAI"]
-                    # Safely retrieve credentials (or empty string)
-                    endpoint = str(getattr(settings, "AZURE_OPENAI_ENDPOINT", "") or "")
-                    api_key = getattr(settings, "AZURE_OPENAI_API_KEY", "") or ""
-                    deployment = (
-                        getattr(settings, "AZURE_OPENAI_DEPLOYMENT_OAS", "") or ""
-                    )
-
-                    llm_client = llm_cls(
-                        azure_endpoint=endpoint,
-                        api_key=api_key,
-                        api_version="2024-05-01-preview",
-                    )
-
-                    human_prompt = (
-                        "Here is an invalid OpenAPI spec:\n"
-                        f"{spec_str}\n\n"
-                        "Please provide a list of corrections and the corrected spec in HTML format "
-                        "(no <html> or <body> tags)."
-                    )
-
-                    # Always use the callable chain form to invoke FakeAzureOpenAI correctly
-                    resp = (
-                        llm_client.chat()
-                        .completions()
-                        .create(
-                            model=deployment,
-                            messages=[
-                                {
-                                    "role": "system",
-                                    "content": "You are an OAS validator.",
-                                },
-                                {"role": "user", "content": human_prompt},
-                            ],
-                            temperature=0,
-                            max_tokens=1024,
-                            n=1,
-                            stop=None,
-                        )
-                    )
-
-                    diff_html = resp.choices[0].message.content
-                except Exception as llm_err:
-                    logger.error("LLM-based diff failed", error=str(llm_err))
-
-            raise OASValidationError(errors=errors, diff_html=diff_html)
-
-        # 4. If valid (no errors), return success
-        return ValidationReport(valid=True, errors=[], diff_html=None)
+        # Prepare the messages for the LLM
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=yaml.dump(oas_spec, default_flow_style=False)),
+        ]
+        # Call the LLM with the messages
+        response = llm_instance.invoke(messages)
+        return response.content if response else "No response from LLM"

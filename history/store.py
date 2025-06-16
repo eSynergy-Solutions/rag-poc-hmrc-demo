@@ -3,10 +3,10 @@
 from threading import Lock
 from typing import Dict, List
 from models.chat import ChatMessage
-from errors import StorageError
+from abstracts.HistoryStore import HistoryStore
 
 
-class InMemoryHistoryStore:
+class InMemoryHistoryStore(HistoryStore):
     """
     Simple in-memory store for chat history, keyed by session ID.
     Not persistent across restarts; intended as a lightweight default.

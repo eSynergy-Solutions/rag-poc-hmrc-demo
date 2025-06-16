@@ -46,7 +46,7 @@ class Settings(BaseSettings):
 
     # Optional extras ---------------------------------------------------------
     SPEC_API_URL: Optional[str] = None
-    FEATURE_FLAGS: List[str] = []
+    FEATURE_FLAGS: List[str] = ["oas_llm"]
     VECTOR_K: int = 3
     INGESTION_URL: Optional[str] = None
 
