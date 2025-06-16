@@ -15,7 +15,7 @@ router = APIRouter()
 
 class QueryRequest(BaseModel):
     content: str
-    streaming: bool
+    streaming: bool = False
 
 
 class QueryResponse(BaseModel):

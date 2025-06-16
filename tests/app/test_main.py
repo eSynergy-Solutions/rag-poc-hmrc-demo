@@ -39,7 +39,7 @@ def test_chat_incorrect_chat_incorrect_content_type(client):
 
 
 def test_chat_correct_chat(client):
-    response = client.post("/chat", json={"content": "Hello"})
+    response = client.post("/chat", json={"content": "Hello", "streaming": False})
     assert response.status_code == 200
     assert "role" in response.json()
     assert "content" in response.json()
