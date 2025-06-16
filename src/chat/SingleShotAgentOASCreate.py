@@ -21,13 +21,13 @@ if not logger.handlers:
     logger.addHandler(handler)
 
 
-class SingleShotAgent(Chat):
+class SingleShotAgentCreate(Chat):
     """
     This class implements the Chat interface for OAS checking functionality.
     It uses Azure OpenAI to validate OAS specifications.
     """
 
-    implements_streaming = True
+    implements_streaming = False
 
     def __init__(self, sysPromptContent="No content"):
         """Initialize the Azure OpenAI client and set up the system prompt"""
@@ -115,7 +115,6 @@ class SingleShotAgent(Chat):
                 frequency_penalty=0,
                 presence_penalty=0,
                 stop=None,
-                stream=streamed,
             )
         except Exception as e:
             logger.exception("Error during OpenAI completion call")

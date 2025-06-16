@@ -14,9 +14,8 @@ router = APIRouter()
 # Input and output schemas
 
 
-class QueryRequest(BaseModel):
+class QueryRequestCreate(BaseModel):
     content: str
-    streaming: bool = False
 
 
 class QueryResponse(BaseModel):
@@ -26,11 +25,11 @@ class QueryResponse(BaseModel):
 # Router
 
 
-@router.post("/oas-checker")
-def oasChecker(query: QueryRequest, request: Request):
-    HistoryObject = request.app.state.HistoryObjectOASChecker
-    ChatObject: SingleShotAgent = request.app.state.ChatObjectOasAgent
-    logger.info(f"Received chat request: {query.content} streaming={query.streaming}")
+@router.post("/oas-create")
+def oasCreate(query: QueryRequestCreate, request: Request):
+    HistoryObject = request.app.state.HistoryObjectOASCreate
+    ChatObject: SingleShotAgent = request.app.state.ChatObjectOasCreate
+    logger.info(f"Received chat request: {query.content}")
     message = ChatMessage(role="user", content=query.content)
     HistoryObject.record_message(message)
     logger.info("Message recorded in history.")
@@ -38,10 +37,18 @@ def oasChecker(query: QueryRequest, request: Request):
     context_history = HistoryObject.get_context_history()
     logger.info(f"Context history retrieved: {context_history}")
 
+    chat_response = ChatObject.chat_query(chat_history=context_history, streamed=False)
+    logger.info("Chat response generated.")
+    logger.info(f"Chat response content: {chat_response}")
+
+    if not chat_response:
+        logger.error("Chat response is empty or None.")
+        return "The provided response is invalid or could not be processed"
+
     try:
         logger.info("content passed to yaml_to_json:")
-        logger.info(query.content)
-        json_api_spec = ChatObject.yaml_to_json(query.content)
+        logger.info(chat_response.content)
+        json_api_spec = ChatObject.yaml_to_json(chat_response.content)
         logger.info("Converted YAML to JSON successfully.")
         try:
             oas_validity = ChatObject.validate_oas_spec(json_api_spec)
@@ -52,26 +59,8 @@ def oasChecker(query: QueryRequest, request: Request):
         logger.error(f"Failed to convert YAML to JSON: {e}")
         return "The provided OpenAPI Specification is invalid or could not be processed"
 
-    chat_response = ChatObject.chat_query(
-        chat_history=context_history, streamed=query.streaming
-    )
+    logger.info(f"Chat response generated: {chat_response}")
 
-    if not query.streaming:
-        logger.info(f"Chat response generated: {chat_response}")
-
-        HistoryObject.record_message(chat_response)
-        logger.info("Chat response recorded in history.")
-        return chat_response
-
-    def stream_chat():
-        response_content = ""
-        for chunk in chat_response:
-            yield chunk
-            response_content += chunk
-
-        logger.info(f"Chat response generated: {response_content}")
-        HistoryObject.record_message(
-            ChatMessage(role="assistant", content=response_content)
-        )
-
-    return StreamingResponse(stream_chat(), media_type="text/plain")
+    HistoryObject.record_message(chat_response)
+    logger.info("Chat response recorded in history.")
+    return chat_response.content

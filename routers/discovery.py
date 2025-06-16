@@ -2,6 +2,8 @@ from fastapi import APIRouter, Request
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 from src.schemas.ChatSchemas import ChatMessage
+from src.history.BasicHistory import OneShotHistory
+from src.chat.SingleShotAgent import SingleShotAgent
 import logging
 
 # Configure logging
@@ -27,15 +29,31 @@ class QueryResponse(BaseModel):
 
 @router.post("/discover")
 def discover(query: QueryRequest, request: Request):
-    HistoryObject = request.app.state.HistoryObjectDiscovery
-    ChatObject = request.app.state.ChatObjectDiscovery
+    HistoryObject: OneShotHistory = request.app.state.HistoryObjectDiscovery
+    ChatObject: SingleShotAgent = request.app.state.ChatObjectDiscovery
     logger.info(f"Received chat request: {query.content} streaming={query.streaming}")
+
     message = ChatMessage(role="user", content=query.content)
     HistoryObject.record_message(message)
     logger.info("Message recorded in history.")
 
     context_history = HistoryObject.get_context_history()
+    print(f"Context history: {context_history}")
     logger.info(f"Context history retrieved: {context_history}")
+
+    try:
+        logger.info("content passed to yaml_to_json:")
+        logger.info(query.content)
+        json_api_spec = ChatObject.yaml_to_json(query.content)
+        logger.info("Converted YAML to JSON successfully.")
+        try:
+            oas_validity = ChatObject.validate_oas_spec(json_api_spec)
+        except Exception as e:
+            logger.error(f"Failed to validate OAS spec: {e}")
+            return "The provided OpenAPI Specification is invalid or could not be processed"
+    except Exception as e:
+        logger.error(f"Failed to convert YAML to JSON: {e}")
+        return "The provided OpenAPI Specification is invalid or could not be processed"
 
     chat_response = ChatObject.chat_query(
         chat_history=context_history, streamed=query.streaming
