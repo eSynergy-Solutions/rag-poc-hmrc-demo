@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from models.oas import ValidationReport
+from models.chat import ChatMessage
 
 
 class ServiceOAS(ABC):
@@ -11,6 +11,35 @@ class ServiceOAS(ABC):
     """
 
     @abstractmethod
-    def validate_spec(self, spec_str: str) -> ValidationReport:
-        # 1. Attempt full ResolvingParser; if that fails, fallback to yaml.safe_load
+    def yaml_to_json(self, yaml_string: str) -> dict:
+        """
+        Convert a YAML string to JSON string
+
+        Parameters:
+        yaml_string (str): The YAML content as a string
+
+        Returns:
+        dict: The converted JSON string
+        """
+        pass
+
+    @abstractmethod
+    def validate_spec(self, oas_spec: dict) -> bool:
+        """
+        Validate an OpenAPI Specification (OAS) string.
+
+        Args:
+            oas_spec (dict): The OAS content as a dict.
+
+        Returns:
+            bool: True if the OAS is valid, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def enforce_specific_fields(self, field: str, spec: dict) -> bool:
+        pass
+
+    @abstractmethod
+    def run_oas_check_llm(self, oas_spec: dict) -> ChatMessage:
         pass

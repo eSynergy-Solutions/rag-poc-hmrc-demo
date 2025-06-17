@@ -7,7 +7,10 @@ import inspect
 import types
 import httpx  # for monkey-patching iter_content if needed
 
-from models.chat import QueryRequest, QueryResponse, ChatMessage
+from models.chat import ChatMessage
+from schemas.responses import QueryResponse
+from schemas.requests import QueryRequest
+
 from services.rag_service import RAGService
 from core.deps import get_chat_chain
 from history.store import get_history_store

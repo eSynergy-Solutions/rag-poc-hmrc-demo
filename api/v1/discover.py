@@ -1,8 +1,8 @@
 # app/api/v1/discover.py
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Body
-from fastapi.responses import StreamingResponse
-from models.chat import QueryRequest, QueryResponse, ChatMessage
+from models.chat import ChatMessage
+from schemas.responses import QueryResponse
 from services.rag_service import RAGService
 from core.deps import get_chat_chain
 from history.store import get_history_store  # for stateful history

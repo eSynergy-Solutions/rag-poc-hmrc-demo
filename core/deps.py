@@ -7,6 +7,7 @@ from core.logging import logger
 from llm.embeddings import get_embedding
 from langchain_community.chat_models import AzureChatOpenAI
 from llm.chat_chain import build_chat_chain
+from llm.single_call import build_chat_instance
 from vectorstore.interface import VectorStore
 from vectorstore.astradb import AstraStore
 import os
@@ -115,13 +116,10 @@ def get_chat_service(
         raise HTTPException(status_code=500, detail="Chat chain unavailable")
 
     try:
-        llm = AzureChatOpenAI(
-            azure_deployment=config.AZURE_OPENAI_DEPLOYMENT,
-            azure_endpoint=str(config.AZURE_OPENAI_ENDPOINT),
-            openai_api_key=config.AZURE_OPENAI_API_KEY,
-            api_version=api_version,
-            temperature=0.2,
-            verbose=False,
+        llm = build_chat_instance(
+            deployment=config.AZURE_OPENAI_DEPLOYMENT,
+            endpoint=str(config.AZURE_OPENAI_ENDPOINT),
+            api_key=config.AZURE_OPENAI_API_KEY,
         )
 
         return llm

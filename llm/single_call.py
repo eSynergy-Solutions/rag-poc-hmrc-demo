@@ -1,10 +1,7 @@
 # app/llm/single_call.py
 
 import os
-from typing import Any, Dict, Optional
 from langchain_community.chat_models import AzureChatOpenAI
-from langchain.chains import RetrievalQA
-from langchain.schema import BaseRetriever
 from fastapi import HTTPException
 
 # from llm.prompts import standard_rag_system_prompt

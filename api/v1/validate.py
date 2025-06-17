@@ -1,14 +1,12 @@
-# app/api/v1/oas.py
+# app/api/v1/validate.py
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Body
-from fastapi.responses import HTMLResponse
-from services.oas_service import OASService, ValidationReport
+from fastapi import APIRouter, Depends, HTTPException, Request
+from services.oas_service import OASService
 from core.deps import get_settings
-from errors import OASValidationError, ChatServiceError
-import yaml
 from core.logging import logger
-from core.deps import get_chat_service
-from models.chat import QueryRequest, QueryResponseValidation
+from schemas.requests import QueryRequest
+from schemas.responses import QueryResponse
+from models.chat import ChatMessage
 
 # from llm.chat_chain import build_chat_chain  # for future LLM-based path
 from fastapi import status
@@ -62,7 +60,7 @@ def validate(
 
     llm_response = service.run_oas_check_llm(load_data)
     if llm_response:
-        return QueryResponseValidation(content=llm_response)
+        return QueryResponse(messages=[llm_response])
     else:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

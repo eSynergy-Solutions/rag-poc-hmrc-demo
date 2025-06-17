@@ -1,17 +1,13 @@
 # app/services/oas_service.py
 
 import yaml
-from prance import ResolvingParser
 from openapi_spec_validator import validate
-from typing import List, Optional, Any
 from core.logging import logger
 from core.deps import get_chat_service
-from errors import OASValidationError
-from core.config import settings
-from models.oas import ValidationReport
 from abstracts.ServiceOas import ServiceOAS
 from llm.prompts import PROMPT_REGISTRY
 from langchain_core.messages import HumanMessage, SystemMessage
+from models.chat import ChatMessage
 
 # Import AzureOpenAI at module scope so tests can monkey-patch it
 try:
@@ -51,7 +47,7 @@ class OASService(ServiceOAS):
         except Exception as e:
             return f"Error converting YAML to JSON: {str(e)}"
 
-    def validate_spec(self, oas_spec: dict) -> ValidationReport:
+    def validate_spec(self, oas_spec: dict) -> bool:
         """
         Validate an OpenAPI Specification (OAS) string.
 
@@ -77,7 +73,7 @@ class OASService(ServiceOAS):
             return False
         return True
 
-    def run_oas_check_llm(self, oas_spec: dict) -> str:
+    def run_oas_check_llm(self, oas_spec: dict) -> ChatMessage:
         llm_instance = get_chat_service()
         if not llm_instance:
             raise RuntimeError("Chat service is not available")
@@ -95,4 +91,8 @@ class OASService(ServiceOAS):
         ]
         # Call the LLM with the messages
         response = llm_instance.invoke(messages)
-        return response.content if response else "No response from LLM"
+        formatted_response: ChatMessage = ChatMessage(
+            role="assistant",
+            content=response.content if hasattr(response, "content") else str(response),
+        )
+        return formatted_response if response else None
