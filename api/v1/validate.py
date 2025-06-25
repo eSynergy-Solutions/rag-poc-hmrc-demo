@@ -1,29 +1,87 @@
 # app/api/v1/validate.py
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from services.oas_service import OASService
+from fastapi import APIRouter, Depends, HTTPException, Request, Body
+from services.validation_service import OASService
 from core.deps import get_settings
-from core.logging import logger
+from core.custom_logging import logger
 from schemas.requests import QueryRequest
 from schemas.responses import QueryResponse
-from models.chat import ChatMessage
 
 # from llm.chat_chain import build_chat_chain  # for future LLM-based path
 from fastapi import status
 
 router = APIRouter()
 
+response_examples = {
+    200: {
+        "description": "Successful validation response",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "BasicSuccess": {
+                        "summary": "Valid OpenAPI spec with suggestions",
+                        "value": {
+                            "messages": [
+                                {
+                                    "role": "assistant",
+                                    "content": "The OpenAPI spec is valid, but consider removing extra line breaks in the info.description.",
+                                }
+                            ]
+                        },
+                    }
+                }
+            }
+        },
+    },
+    422: {
+        "description": "Validation error",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "MissingContent": {
+                        "summary": "Missing 'content' field",
+                        "value": {
+                            "detail": [
+                                {
+                                    "loc": ["body", "content"],
+                                    "msg": "field required",
+                                    "type": "value_error.missing",
+                                }
+                            ]
+                        },
+                    }
+                }
+            }
+        },
+    },
+}
 
-@router.post("/validate")
+
+@router.post(
+    "/validate",
+    response_model=QueryResponse,
+    responses=response_examples,
+)
 def validate(
     request: Request,
-    payload: QueryRequest,
+    payload: QueryRequest = Body(
+        ...,
+        examples=[
+            {
+                "content": "openapi: 3.0.3\ninfo:\n  title: Hello World API\n  version: '1.0'\npaths:....",
+                "streaming": False,
+            },
+        ],
+    ),
     settings=Depends(get_settings),
 ):
     """
-    Endpoint to validate an OpenAPI spec and return HTML-formatted suggestions.
-    If FEATURE_FLAGS includes "oas_llm", use an LLM-based check (placeholder).
-    Otherwise, run static JSON-Schema validation via OASService.
+    Endpoint to validate an OpenAPI spec and return YAML formatted suggestions.
+    Run static validation first, then LLM-based suggestions.
+    This endpoint does not maintain state or conversation history.
+    It expects a valid OpenAPI spec in YAML format as input.
+    The response will be a YAML formatted string with suggestions or errors.
+    If the input is not a valid OpenAPI spec, it will return an error.
     """
 
     spec_content = payload.content

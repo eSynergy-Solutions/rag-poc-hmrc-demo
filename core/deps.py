@@ -1,97 +1,90 @@
 # app/core/deps.py
 
-from typing import Generator
-from fastapi import Depends, HTTPException
-
-from core.logging import logger
-from llm.embeddings import get_embedding
+from fastapi import HTTPException
+from core.custom_logging import logger
 from langchain_community.chat_models import AzureChatOpenAI
-from llm.chat_chain import build_chat_chain
+from langchain_postgres.vectorstores import PGVector, DistanceStrategy
 from llm.single_call import build_chat_instance
+from llm.embeddings import get_embedding, get_embedding_client
 from vectorstore.interface import VectorStore
-from vectorstore.astradb import AstraStore
-import os
 from core.config import settings
+import os
+
+# from vectorstore.astradb import AstraStore
 
 
-def get_settings() -> Generator:
+def get_settings():
     """
-    Dynamically import and yield the latest Settings instance.
+    Dynamically import and return the latest Settings instance.
     This ensures that after a reload(core.config), we pick up
     None (or the updated Settings) as intended.
     """
 
-    yield settings
+    return settings
 
 
-def get_logger() -> Generator:
-    yield logger
+def get_logger():
+    return logger
 
 
 def get_vector_store(
-    config=Depends(get_settings),
-) -> Generator[VectorStore, None, None]:
+    config=get_settings(),
+):
     # If settings failed to load, `config` is None
     if config is None:
-        raise HTTPException(status_code=500, detail="Vector store unavailable")
+        raise HTTPException(
+            status_code=500,
+            detail="Vector store unavailable; configurations failed to load",
+        )
 
     # explicit sanity check for required fields
-    if not config.ASTRA_DB_APPLICATION_TOKEN or not config.ASTRA_DB_API_ENDPOINT:
-        raise HTTPException(status_code=500, detail="Vector store unavailable")
+    if (
+        not config.PGVECTOR_USER
+        or not config.PGVECTOR_PASSWORD
+        or not config.PGVECTOR_HOST
+    ):
+        raise HTTPException(
+            status_code=500,
+            detail="Vector store unavailable; Username, password or host string is unavailable",
+        )
 
     try:
-        store = AstraStore(
-            token=config.ASTRA_DB_APPLICATION_TOKEN,
-            api_endpoint=str(config.ASTRA_DB_API_ENDPOINT),
-            keyspace=config.ASTRA_DB_KEYSPACE,
-            collection_name=config.DS_COLLECTION_NAME,
+        connection_string = PGVector.connection_string_from_db_params(
+            driver=config.PGVECTOR_DRIVER,
+            host=config.PGVECTOR_HOST,
+            port=config.PGVECTOR_PORT,
+            database=config.PGVECTOR_DATABASE,
+            user=config.PGVECTOR_USER,
+            password=config.PGVECTOR_PASSWORD,
         )
-        yield store
+
+        embeddings = get_embedding_client()
+
+        store = PGVector(
+            collection_name=config.PGVECTOR_COLLECTION,
+            connection=connection_string,
+            embeddings=embeddings,
+            use_jsonb=True,
+            distance_strategy=DistanceStrategy.COSINE,
+        )
+
+        logger.info("Vector store successfully loaded.")
+        return store
     except Exception as e:
-        logger.error("Failed to initialize AstraStore", error=str(e))
+        logger.error("Failed to initialize Postgres VectorDB:\n", error=str(e))
         raise HTTPException(status_code=500, detail="Vector store unavailable")
 
 
 def get_embedding_fn(
-    config=Depends(get_settings),
-) -> Generator:
-    # Yield the single canonical function object from llm.embeddings
-    import llm.embeddings as _emb_mod
+    config=get_settings(),
+):
+    # return the single canonical function object from llm.embeddings
 
-    yield _emb_mod.get_embedding
-
-
-def get_chat_chain(
-    config=Depends(get_settings),
-    store: VectorStore = Depends(get_vector_store),
-) -> Generator:
-    # If settings failed to load, `config` is None
-    if config is None:
-        raise HTTPException(status_code=500, detail="Chat chain unavailable")
-
-    # explicit sanity check for required config
-    if (
-        not config.AZURE_OPENAI_ENDPOINT
-        or not config.AZURE_OPENAI_API_KEY
-        or not config.AZURE_OPENAI_DEPLOYMENT
-    ):
-        raise HTTPException(status_code=500, detail="Chat chain unavailable")
-
-    try:
-        chain = build_chat_chain(
-            endpoint=str(config.AZURE_OPENAI_ENDPOINT),
-            api_key=config.AZURE_OPENAI_API_KEY,
-            deployment=config.AZURE_OPENAI_DEPLOYMENT,
-            retriever=store.as_retriever(config.VECTOR_K),
-        )
-        yield chain
-    except Exception as e:
-        logger.error("Failed to build chat chain", error=str(e))
-        raise HTTPException(status_code=500, detail="Chat chain unavailable")
+    return get_embedding
 
 
 def get_chat_service(
-    config=settings,
+    config=get_settings(),
 ) -> AzureChatOpenAI:
     """
     Provides a chat service that does not require a vector store.

@@ -2,7 +2,7 @@
 
 import yaml
 from openapi_spec_validator import validate
-from core.logging import logger
+from core.custom_logging import logger
 from core.deps import get_chat_service
 from abstracts.ServiceOas import ServiceOAS
 from llm.prompts import PROMPT_REGISTRY

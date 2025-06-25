@@ -3,9 +3,11 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.v1 import chat, discover, health, history, test, validate
-from core.logging import logger
+from api.v1 import discover, validate
+from core.custom_logging import logger
 from core.config import settings
+
+# from api.v1 import chat, discover, health, history, test, validate
 
 
 # Build the FastAPI application
@@ -26,25 +28,25 @@ app.add_middleware(
 )
 
 # ---- routers ----------------------------------------------------------
-app.include_router(health.router, prefix="/v1", tags=["health"])
-app.include_router(chat.router, prefix="/v1", tags=["chat"])
+# app.include_router(health.router, prefix="/v1", tags=["health"])
+# app.include_router(chat.router, prefix="/v1", tags=["chat"])
 app.include_router(discover.router, prefix="/v1", tags=["discover"])
 app.include_router(validate.router, prefix="/v1", tags=["validate"])
-app.include_router(history.router, prefix="/v1", tags=["history"])
-app.include_router(test.router, prefix="/v1", tags=["test"])
+# app.include_router(history.router, prefix="/v1", tags=["history"])
+# app.include_router(test.router, prefix="/v1", tags=["test"])
 
 logger.info(
     "FastAPI app initialized",
     app_name=settings.APP_NAME,
     version=settings.APP_VERSION,
     routes=[
-        "/v1/health/live",
-        "/v1/health/ready",
-        "/v1/chat",
+        # "/v1/health/live",
+        # "/v1/health/ready",
+        # "/v1/chat",
         "/v1/discover",
         "/v1/validate",
-        "/v1/history",
-        "/v1/test",
+        # "/v1/history",
+        # "/v1/test",
     ],
 )
 
@@ -57,4 +59,4 @@ if __name__ == "__main__":
         app_name=settings.APP_NAME,
         version=settings.APP_VERSION,
     )
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)

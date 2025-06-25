@@ -3,11 +3,13 @@
 from functools import lru_cache
 from typing import List
 import os
+from langchain_openai import AzureOpenAIEmbeddings
 
 # Attempt to import AzureOpenAI at module scope so tests can monkey-patch it.
 try:
     from openai import AzureOpenAI
 except ImportError:
+
     class AzureOpenAI:
         def __init__(self, azure_endpoint: str, api_key: str, api_version: str):
             raise RuntimeError(
@@ -17,6 +19,36 @@ except ImportError:
 
 
 from core.config import settings
+
+
+def get_embedding_client() -> AzureOpenAIEmbeddings:
+    """
+    Retrieve an embedding model via Azure OpenAI (using your AZURE_OPENAI_EMB_… vars).
+    """
+
+    # 1. Gather embedding‐specific settings
+    emb_endpoint = str(getattr(settings, "AZURE_OPENAI_EMB_ENDPOINT", "") or "")
+    emb_api_key = str(getattr(settings, "AZURE_OPENAI_EMB_API_KEY", "") or "")
+    emb_api_version = str(getattr(settings, "AZURE_OPENAI_EMB_API_VERSION", "") or "")
+    emb_deployment = str(getattr(settings, "AZURE_OPENAI_EMB_DEPLOYMENT", "") or "")
+
+    if not emb_endpoint or not emb_api_key or not emb_api_version or not emb_deployment:
+        raise RuntimeError(
+            "Embedding configuration is incomplete. "
+            "Ensure AZURE_OPENAI_EMB_ENDPOINT, AZURE_OPENAI_EMB_API_KEY, AZURE_OPENAI_EMB_API_VERSION, and AZURE_OPENAI_EMB_DEPLOYMENT are set."
+        )
+
+    # 2. Instantiate the AzureOpenAI client with the embedding‐specific endpoint & version
+    try:
+        client = AzureOpenAIEmbeddings(
+            model=emb_deployment,
+            azure_endpoint=emb_endpoint,
+            api_key=emb_api_key,
+            openai_api_version=emb_api_version,
+        )
+        return client
+    except Exception as e:
+        raise RuntimeError(f"Client failed to initialise: {e}")
 
 
 @lru_cache(maxsize=1024)

@@ -16,6 +16,8 @@ Highlights
 from __future__ import annotations
 
 from typing import List, Optional
+from core.custom_logging import logger
+
 
 from pydantic import Field, ValidationError, field_validator, model_validator
 from pydantic_settings import BaseSettings
@@ -44,6 +46,15 @@ class Settings(BaseSettings):
     ASTRA_DB_KEYSPACE: str = "defra_chatbot_keyspace"
     DS_COLLECTION_NAME: str = Field("funding_for_farmers")
 
+    # AWS Aurora RDS Postgres VectorDB (required) -----------------------------------------------------
+    PGVECTOR_DRIVER: Optional[str] = "psycopg"
+    PGVECTOR_USER: Optional[str] = None
+    PGVECTOR_PASSWORD: Optional[str] = None
+    PGVECTOR_HOST: Optional[str] = None
+    PGVECTOR_PORT: Optional[int] = 5432
+    PGVECTOR_DATABASE: Optional[str] = "postgres"
+    PGVECTOR_COLLECTION: Optional[str] = "HMRC_APIS"
+
     # Optional extras ---------------------------------------------------------
     SPEC_API_URL: Optional[str] = None
     FEATURE_FLAGS: List[str] = ["oas_llm"]
@@ -64,6 +75,9 @@ class Settings(BaseSettings):
         "AZURE_OPENAI_ENDPOINT",
         "ASTRA_DB_API_ENDPOINT",
         "AZURE_OPENAI_EMB_ENDPOINT",
+        "PGVECTOR_HOST",
+        "PGVECTOR_USER",
+        "PGVECTOR_PASSWORD",
         mode="before",
     )
     def _strip_trailing_slash(cls, v: Optional[str]) -> Optional[str]:
@@ -102,6 +116,13 @@ class Settings(BaseSettings):
             "AZURE_OPENAI_EMB_DEPLOYMENT",
             "ASTRA_DB_APPLICATION_TOKEN",
             "ASTRA_DB_API_ENDPOINT",
+            "PGVECTOR_DRIVER",
+            "PGVECTOR_USER",
+            "PGVECTOR_PASSWORD",
+            "PGVECTOR_HOST",
+            "PGVECTOR_PORT",
+            "PGVECTOR_DATABASE",
+            "PGVECTOR_COLLECTION",
         ]
         missing = [name for name in required if not getattr(self, name)]
         if missing:
@@ -111,13 +132,13 @@ class Settings(BaseSettings):
         return self
 
 
-# --------------------------------------------------------------------------- #
-# Singleton instance – it’s fine if this fails during test-runs; the parts of
-# the code-base that depend on configuration are already defensive.
-# --------------------------------------------------------------------------- #
-
 try:
     settings = Settings()  # type: ignore[call-arg]
-except ValidationError:
+    logger.info(
+        "Configuration loaded successfully",
+    )
+except ValidationError as e:
     # Leave a benign placeholder so that `import settings` never explodes.
+
+    logger.error("Configuration validation failed", error=str(e))
     settings = None  # type: ignore[assignment]
