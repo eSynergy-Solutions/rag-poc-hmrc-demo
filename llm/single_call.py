@@ -3,15 +3,23 @@
 import os
 from langchain_openai import AzureChatOpenAI
 from fastapi import HTTPException
+from llm.gailz_llm import GailzLLM
 
 # from llm.prompts import standard_rag_system_prompt
 
 
+# def build_chat_instance(
+#     endpoint: str,
+#     api_key: str,
+#     deployment: str,
+# ) -> AzureChatOpenAI:
 def build_chat_instance(
-    endpoint: str,
-    api_key: str,
-    deployment: str,
-) -> AzureChatOpenAI:
+    base_url,
+    deployment,
+    misc_string,
+    deployment_version,
+    deployment_model,
+):
     """
     Provides a chat service that does not require a vector store.
     This is useful for scenarios where chat capabilities are needed
@@ -25,14 +33,22 @@ def build_chat_instance(
         )
 
     try:
-        llm = AzureChatOpenAI(
-            azure_deployment=deployment,
-            azure_endpoint=str(endpoint),
-            openai_api_key=api_key,
-            api_version=api_version,
-            temperature=0.2,
-            verbose=False,
+        llm = GailzLLM(
+            base_url,
+            deployment,
+            misc_string,
+            deployment_version,
+            deployment_model,
         )
+
+        # llm = AzureChatOpenAI(
+        #     azure_deployment=deployment,
+        #     azure_endpoint=str(endpoint),
+        #     openai_api_key=api_key,
+        #     api_version=api_version,
+        #     temperature=0.2,
+        #     verbose=False,
+        # )
 
         return llm
     except Exception:

@@ -85,7 +85,7 @@ def get_embedding_fn(
 
 def get_chat_service(
     config=get_settings(),
-) -> AzureChatOpenAI:
+):
     """
     Provides a chat service that does not require a vector store.
     This is useful for scenarios where chat capabilities are needed
@@ -102,18 +102,26 @@ def get_chat_service(
 
     # explicit sanity check for required config
     if (
-        not config.AZURE_OPENAI_ENDPOINT
-        or not config.AZURE_OPENAI_API_KEY
-        or not config.AZURE_OPENAI_DEPLOYMENT
+        not config.GAILZ_BASE_URL
+        or not config.GAILZ_DEPLOYMENT_NAME
+        or not config.GAILZ_MISC_STRING
+        or not config.GAILZ_DEPLOYMENT_VERSION
     ):
         raise HTTPException(status_code=500, detail="Chat chain unavailable")
 
     try:
         llm = build_chat_instance(
-            deployment=config.AZURE_OPENAI_DEPLOYMENT,
-            endpoint=str(config.AZURE_OPENAI_ENDPOINT),
-            api_key=config.AZURE_OPENAI_API_KEY,
+            base_url=config.GAILZ_BASE_URL,
+            deployment=config.GAILZ_DEPLOYMENT_NAME,
+            misc_string=config.GAILZ_MISC_STRING,
+            deployment_version=config.GAILZ_DEPLOYMENT_VERSION,
+            deployment_model=config.GAILZ_DEPLOYMENT_MODEL,
         )
+        # llm = build_chat_instance(
+        #     deployment=config.AZURE_OPENAI_DEPLOYMENT,
+        #     endpoint=str(config.AZURE_OPENAI_ENDPOINT),
+        #     api_key=config.AZURE_OPENAI_API_KEY,
+        # )
 
         return llm
     except Exception as e:

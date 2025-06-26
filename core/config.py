@@ -55,6 +55,13 @@ class Settings(BaseSettings):
     PGVECTOR_DATABASE: Optional[str] = "postgres"
     PGVECTOR_COLLECTION: Optional[str] = "HMRC_APIS"
 
+    # GAILZ (Required) -----------------------------------------------------
+    GAILZ_BASE_URL: Optional[str] = None
+    GAILZ_DEPLOYMENT_NAME: Optional[str] = None
+    GAILZ_MISC_STRING: Optional[str] = None
+    GAILZ_DEPLOYMENT_VERSION: Optional[str] = None
+    GAILZ_DEPLOYMENT_MODEL: Optional[str] = None
+
     # Optional extras ---------------------------------------------------------
     SPEC_API_URL: Optional[str] = None
     FEATURE_FLAGS: List[str] = ["oas_llm"]
@@ -78,6 +85,11 @@ class Settings(BaseSettings):
         "PGVECTOR_HOST",
         "PGVECTOR_USER",
         "PGVECTOR_PASSWORD",
+        "GAILZ_BASE_URL",
+        "GAILZ_DEPLOYMENT_NAME",
+        "GAILZ_MISC_STRING",
+        "GAILZ_DEPLOYMENT_VERSION",
+        "GAILZ_DEPLOYMENT_MODEL",
         mode="before",
     )
     def _strip_trailing_slash(cls, v: Optional[str]) -> Optional[str]:
@@ -123,6 +135,11 @@ class Settings(BaseSettings):
             "PGVECTOR_PORT",
             "PGVECTOR_DATABASE",
             "PGVECTOR_COLLECTION",
+            "GAILZ_BASE_URL",
+            "GAILZ_DEPLOYMENT_NAME",
+            "GAILZ_MISC_STRING",
+            "GAILZ_DEPLOYMENT_VERSION",
+            "GAILZ_DEPLOYMENT_MODEL",
         ]
         missing = [name for name in required if not getattr(self, name)]
         if missing:
