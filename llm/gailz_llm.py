@@ -2,7 +2,8 @@ import requests
 from typing import List, Union, Dict, Any
 from langchain_core.runnables import Runnable
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
-
+from core.deps import get_logger
+import json
 
 class GailzLLM(Runnable):
     """
@@ -18,10 +19,14 @@ class GailzLLM(Runnable):
         deployment_version,
         deployment_model,
     ):
+
+        self._logger = get_logger()
         self._llm_api_string = (
             f"{base_url}/{deployment}/{misc_string}/{deployment}/{deployment_version}"
         )
         self._model = deployment_model
+
+        self._logger.info(f'Built url:\n{self._llm_api_string}')
 
     def _convert_messages(self, messages: List[BaseMessage]) -> List[Dict[str, str]]:
         """
@@ -43,6 +48,7 @@ class GailzLLM(Runnable):
         """
         url = self._llm_api_string
 
+        headers = {"Content-Type": "application/json"}
         payload = {
             "model": self._model,
             "messages": self._convert_messages(messages),
@@ -50,9 +56,12 @@ class GailzLLM(Runnable):
             "stream": streaming,
         }
 
+        self._logger.info(f'Sending payload to Gailz API:\n{json.dumps(payload, indent=2)}')
+        self._logger.info(f'Sending headers to Gailz API:\n{json.dumps(headers, indent=2)}')
+
         response = requests.post(
             url,
-            headers={"Content-Type": "application/json"},
+            headers=headers,
             json=payload,
         )
         response.raise_for_status()
