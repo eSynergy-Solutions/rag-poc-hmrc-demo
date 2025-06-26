@@ -14,11 +14,7 @@ from llm.gailz_llm import GailzLLM
 #     deployment: str,
 # ) -> AzureChatOpenAI:
 def build_chat_instance(
-    base_url,
-    deployment,
-    misc_string,
-    deployment_version,
-    deployment_model,
+    base_url, deployment, misc_string, deployment_version, deployment_model, logger
 ):
     """
     Provides a chat service that does not require a vector store.
@@ -39,6 +35,7 @@ def build_chat_instance(
             misc_string,
             deployment_version,
             deployment_model,
+            logger,
         )
 
         # llm = AzureChatOpenAI(

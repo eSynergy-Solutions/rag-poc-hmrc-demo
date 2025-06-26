@@ -92,7 +92,10 @@ def get_chat_service(
     without retrieval from a vector store.
     """
     if config is None:
-        raise HTTPException(status_code=500, detail="Chat chain unavailable; config file did not oad env vars successfully")
+        raise HTTPException(
+            status_code=500,
+            detail="Chat chain unavailable; config file did not oad env vars successfully",
+        )
 
     # api_version = os.getenv("OPENAI_API_VERSION", None)
     # if api_version is None:
@@ -107,7 +110,9 @@ def get_chat_service(
         or not config.GAILZ_MISC_STRING
         or not config.GAILZ_DEPLOYMENT_VERSION
     ):
-        raise HTTPException(status_code=500, detail="Chat chain unavailable; Gailz env vars not loaded")
+        raise HTTPException(
+            status_code=500, detail="Chat chain unavailable; Gailz env vars not loaded"
+        )
 
     try:
         llm = build_chat_instance(
@@ -116,6 +121,7 @@ def get_chat_service(
             misc_string=config.GAILZ_MISC_STRING,
             deployment_version=config.GAILZ_DEPLOYMENT_VERSION,
             deployment_model=config.GAILZ_DEPLOYMENT_MODEL,
+            logger=get_logger(),
         )
         # llm = build_chat_instance(
         #     deployment=config.AZURE_OPENAI_DEPLOYMENT,
