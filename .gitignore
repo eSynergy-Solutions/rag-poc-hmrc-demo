@@ -144,4 +144,4 @@ oas_chunker2.py
 *.yml
 TODO.md
 
-*.json
+openapi_chunks_rag_ready.json
