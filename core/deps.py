@@ -92,13 +92,13 @@ def get_chat_service(
     without retrieval from a vector store.
     """
     if config is None:
-        raise HTTPException(status_code=500, detail="Chat chain unavailable")
+        raise HTTPException(status_code=500, detail="Chat chain unavailable; config file did not oad env vars successfully")
 
-    api_version = os.getenv("OPENAI_API_VERSION", None)
-    if api_version is None:
-        raise ValueError(
-            "OPENAI_API_VERSION environment variable must be set for AzureChatOpenAI"
-        )
+    # api_version = os.getenv("OPENAI_API_VERSION", None)
+    # if api_version is None:
+    #     raise ValueError(
+    #         "OPENAI_API_VERSION environment variable must be set for AzureChatOpenAI"
+    #     )
 
     # explicit sanity check for required config
     if (
@@ -107,7 +107,7 @@ def get_chat_service(
         or not config.GAILZ_MISC_STRING
         or not config.GAILZ_DEPLOYMENT_VERSION
     ):
-        raise HTTPException(status_code=500, detail="Chat chain unavailable")
+        raise HTTPException(status_code=500, detail="Chat chain unavailable; Gailz env vars not loaded")
 
     try:
         llm = build_chat_instance(
@@ -125,5 +125,7 @@ def get_chat_service(
 
         return llm
     except Exception as e:
-        logger.error("Failed to initialise Azure client", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to initialise Azure client")
+        # logger.error("Failed to initialise Azure client", error=str(e))
+        # raise HTTPException(status_code=500, detail="Failed to initialise Azure client")
+        logger.error("Failed to initialise Gailz client", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to initialise Gailz client")
