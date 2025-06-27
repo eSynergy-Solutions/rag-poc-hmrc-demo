@@ -57,10 +57,10 @@ class GailzLLM(Runnable):
         }
 
         self._logger.info(
-            f"Sending payload to Gailz API:\n{json.dumps(payload, indent=2)}"
+            f"Payload:\n{json.dumps(payload)}"
         )
         self._logger.info(
-            f"Sending headers to Gailz API:\n{json.dumps(headers, indent=2)}"
+            f"Headers:\n{json.dumps(headers)}"
         )
 
         response = requests.post(
@@ -80,8 +80,8 @@ class GailzLLM(Runnable):
         elif isinstance(input_data, dict):
             # Treat as LangChain-style input
             messages = [
-                SystemMessage(content=input_data.get("context", "")),
-                HumanMessage(content=input_data.get("yaml_string", "")),
+                SystemMessage(content=input_data.get("system", "")),
+                HumanMessage(content=input_data.get("user", "")),
             ]
             response = self.chat(messages)
         else:

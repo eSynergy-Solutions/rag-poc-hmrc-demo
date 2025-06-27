@@ -8,7 +8,7 @@ class ServiceDiscovery(ABC):
     """
 
     @abstractmethod
-    def query_vector_database(self, yaml_string: str):
+    def query_vector_database(self, content: str):
         """Query the vector database with a YAML string.
         This method should be implemented by subclasses to perform
         the actual query operation.
