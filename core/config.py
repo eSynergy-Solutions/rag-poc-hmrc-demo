@@ -62,6 +62,8 @@ class Settings(BaseSettings):
     GAILZ_DEPLOYMENT_VERSION: Optional[str] = None
     GAILZ_DEPLOYMENT_MODEL: Optional[str] = None
 
+    GAILZ_EMBEDDING_STRING: Optional[str] = None
+
     # Optional extras ---------------------------------------------------------
     SPEC_API_URL: Optional[str] = None
     FEATURE_FLAGS: List[str] = ["oas_llm"]
@@ -90,6 +92,7 @@ class Settings(BaseSettings):
         "GAILZ_MISC_STRING",
         "GAILZ_DEPLOYMENT_VERSION",
         "GAILZ_DEPLOYMENT_MODEL",
+        "GAILZ_EMBEDDING_STRING",
         mode="before",
     )
     def _strip_trailing_slash(cls, v: Optional[str]) -> Optional[str]:
@@ -140,6 +143,7 @@ class Settings(BaseSettings):
             "GAILZ_MISC_STRING",
             "GAILZ_DEPLOYMENT_VERSION",
             "GAILZ_DEPLOYMENT_MODEL",
+            "GAILZ_EMBEDDING_STRING",
         ]
         missing = [name for name in required if not getattr(self, name)]
         if missing:
