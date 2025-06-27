@@ -7,7 +7,7 @@ from core.deps import get_logger
 from vectorstore.pgvector import PGVectorStore
 from services.oas_chunking import OpenAPIChunker
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import (
+from langchain_core.messages import (
     SystemMessage, HumanMessage
 )
 
@@ -22,7 +22,7 @@ class DiscoveryService(ServiceDiscovery):
     def query_vector_database(self, content: str):
         retrieved_docs = self.store.as_retriever().invoke(content)
         context = "\n".join([doc.page_content for doc in retrieved_docs])
-        system_prompt: str = PROMPT_REGISTRY.get("discover_v2").template
+        system_prompt: str = PROMPT_REGISTRY.get("discovery").template
         self._logger.info(f"Using system prompt:\n{system_prompt}")
 
         prompt = [

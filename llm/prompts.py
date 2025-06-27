@@ -1,4 +1,4 @@
-# app/llm/prompts.py
+# app/llm/prompts.py 
 
 from langchain.prompts import PromptTemplate
 
@@ -49,6 +49,6 @@ discovery_prompt_v2 = PromptTemplate(
 # Prompt registry for easy experiments
 PROMPT_REGISTRY = {
     "rag": standard_rag_system_prompt,
-    "oas_checker": oas_validator_prompt,
-    "discover_v2": discovery_prompt_v2,
+    "validation": oas_validator_prompt,
+    "discovery": discovery_prompt_v2,
 }

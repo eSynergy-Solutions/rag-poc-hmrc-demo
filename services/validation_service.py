@@ -78,9 +78,10 @@ class OASService(ServiceOAS):
         if not llm_instance:
             raise RuntimeError("Chat service is not available")
         # Prepare the system prompt
-        system_prompt = PROMPT_REGISTRY.get(
-            "oas_validator_prompt", "Default OAS Check Prompt"
+        system_prompt_template = PROMPT_REGISTRY.get(
+            "validation", "Default OAS Check Prompt"
         )
+        system_prompt = system_prompt_template.template if hasattr(system_prompt_template, 'template') else str(system_prompt_template)
         if not system_prompt:
             raise RuntimeError("OAS validation prompt not found in registry")
 
