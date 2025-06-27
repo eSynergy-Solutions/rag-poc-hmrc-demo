@@ -31,12 +31,16 @@ class GailzLLM(Runnable):
     def _convert_messages(self, messages: List[BaseMessage]) -> List[Dict[str, str]]:
         """
         Converts LangChain SystemMessage/HumanMessage to dict format.
+        Availabe roles in Gailz LLM API are one of ["user", "assistant", "function" and "system"].
         """
         return [
             {
-                "role": getattr(
+                "role": "user"
+                if getattr(
                     m, "role", m.__class__.__name__.replace("Message", "").lower()
-                ),
+                )
+                == "human"
+                else "system",
                 "content": m.content,
             }
             for m in messages
@@ -52,16 +56,12 @@ class GailzLLM(Runnable):
         payload = {
             "model": self._model,
             "messages": self._convert_messages(messages),
-            "temperature": 0.7,
+            "temperature": 0.1,
             "stream": streaming,
         }
 
-        self._logger.info(
-            f"Payload:\n{json.dumps(payload)}"
-        )
-        self._logger.info(
-            f"Headers:\n{json.dumps(headers)}"
-        )
+        self._logger.info(f"Payload:\n{json.dumps(payload)}")
+        self._logger.info(f"Headers:\n{json.dumps(headers)}")
 
         response = requests.post(
             url,
