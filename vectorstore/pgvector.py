@@ -28,7 +28,7 @@ class PGVectorStore(VectorStore):
                 raise StorageError("Expected PGVector instance")
             self._db: PGVector = client
         except Exception as e:
-            raise StorageError(f"AstraStore initialization failed: {e}")
+            raise StorageError(f"PGVector initialization failed: {e}")
 
     def upsert(self, chunks: List[Chunk]) -> int:
         """

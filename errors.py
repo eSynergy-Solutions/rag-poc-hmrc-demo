@@ -2,9 +2,10 @@
 
 from typing import List, Optional
 
+
 class StorageError(Exception):
     """
-    raised when an underlying vector store (AstraDB or Chroma) operation fails.
+    raised when an underlying vector store (PGVector) operation fails.
     Optionally carries an HTTP-style error code.
     """
 
@@ -12,6 +13,7 @@ class StorageError(Exception):
         super().__init__(message)
         self.message = message
         self.code = code
+
 
 class FetchError(Exception):
     """
@@ -24,6 +26,7 @@ class FetchError(Exception):
         self.detail = detail
         self.status_code = status_code
 
+
 class ChatServiceError(Exception):
     """
     Raised when the RAG service or LLM chain fails in unexpected ways.
@@ -32,6 +35,7 @@ class ChatServiceError(Exception):
     def __init__(self, message: str):
         super().__init__(message)
         self.message = message
+
 
 class OASValidationError(Exception):
     """
@@ -54,6 +58,7 @@ class OASValidationError(Exception):
             joined = "; ".join(self.errors)
             return f"{base}: {joined}"
         return base
+
 
 class DependencyError(Exception):
     """

@@ -5,7 +5,6 @@ annotated-types==0.7.0
 anyio==4.6.2.post1
 appnope==0.1.4
 asgiref==3.8.1
-astrapy==1.5.2
 asttokens==3.0.0
 asyncpg==0.30.0
 attrs==24.2.0
@@ -90,7 +89,7 @@ mypy-extensions==1.0.0
 nest-asyncio==1.6.0
 numpy==1.26.4
 oauthlib==3.2.2
-# onnxruntime==1.22.0
+onnxruntime==1.22.0
 openai==1.56.2
 openapi-schema-validator==0.6.3
 openapi-spec-validator==0.7.2
@@ -119,10 +118,9 @@ prance==25.4.8.0
 prompt_toolkit==3.0.51
 propcache==0.2.0
 protobuf==5.29.5
-# psutil==7.0.0
+psutil==7.0.0
 psycopg==3.2.9
 psycopg-pool==3.2.6
-# psycopg2==2.9.10
 ptyprocess==0.7.0
 pure_eval==0.2.3
 pyasn1==0.6.1

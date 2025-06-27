@@ -2,15 +2,12 @@
 
 from fastapi import HTTPException
 from core.custom_logging import logger
-from langchain_community.chat_models import AzureChatOpenAI
+
+# from langchain_community.chat_models import AzureChatOpenAI
 from langchain_postgres.vectorstores import PGVector, DistanceStrategy
 from llm.single_call import build_chat_instance
 from llm.embeddings import get_embedding, get_embedding_client
-from vectorstore.interface import VectorStore
 from core.config import settings
-import os
-
-# from vectorstore.astradb import AstraStore
 
 
 def get_settings():
