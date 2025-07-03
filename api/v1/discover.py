@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Request, Body
 from models.chat import ChatMessage
 from schemas.responses import QueryResponse
 from schemas.requests import QueryRequest
-from services.discovery_service import DiscoveryService
+from services.rag_service import RagService
 from errors import ChatServiceError
 
 router = APIRouter()
@@ -75,7 +75,7 @@ def discover(
     if not user_query:
         raise HTTPException(status_code=422, detail="Query content cannot be empty")
     try:
-        service = DiscoveryService()
+        service = RagService()
         answer_text = service.query_vector_database(user_query)
     except ChatServiceError as e:
         raise HTTPException(status_code=502, detail=str(e))
@@ -85,4 +85,4 @@ def discover(
     # 3) Wrap response
     assistant_msg = ChatMessage(role="assistant", content=answer_text)
 
-    return QueryResponse(messages=[assistant_msg])
+    return assistant_msg

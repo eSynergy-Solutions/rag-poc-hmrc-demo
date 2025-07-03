@@ -1,20 +1,16 @@
 from abc import ABC, abstractmethod
-from models.chat import ChatMessage
-from typing import List, Tuple
 
 
 class ServiceRag(ABC):
-    """
-    Service for validating (and optionally diffing) OpenAPI Specification content.
-    - Performs YAML parsing fallback
-    - Runs JSON Schema validation
-    - If "oas_llm" is in settings.FEATURE_FLAGS, calls Azure OpenAI to produce an HTML diff.
+    """Abstract base class for service discovery services.
+    This class defines the interface for querying a vector database
+    and discovering services based on YAML specifications.
     """
 
     @abstractmethod
-    def retrieve_and_answer(
-        self,
-        history: List[ChatMessage],
-        user_input: str,
-    ) -> Tuple[str, List[dict]]:
+    def query_vector_database(self, content: str):
+        """Query the vector database with a YAML string.
+        This method should be implemented by subclasses to perform
+        the actual query operation.
+        """
         pass

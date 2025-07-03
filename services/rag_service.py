@@ -1,64 +1,37 @@
-# app/services/rag_service.py
+# app/services/discovery_service.py
 
-from typing import Tuple, List, Optional
-from langchain.chains.retrieval_qa.base import RetrievalQA
-from models.chat import ChatMessage
+from core.deps import get_chat_service
 from abstracts.ServiceRag import ServiceRag
+from llm.prompts import PROMPT_REGISTRY
+from core.deps import get_logger
+from vectorstore.pgvector import PGVectorStore
+from services.oas_chunking import OpenAPIChunker
+from langchain_core.messages import SystemMessage, HumanMessage
+from typing import Literal
 
 
-class RAGService(ServiceRag):
-    """
-    High-level façade for RAG-based chat interactions.
-    Can be initialized with an optional system_prompt to adjust “flavor.”
-    """
+class RagService(ServiceRag):
+    def __init__(self):
+        self.store = PGVectorStore()
+        self.chunker = OpenAPIChunker()
+        self.llm = get_chat_service()
+        self._logger = get_logger()
 
-    def __init__(
-        self,
-        chain: RetrievalQA,
-        system_prompt: Optional[str] = None,
-    ):
-        """
-        Args:
-            chain: A LangChain RetrievalQA chain (or fallback).
-            system_prompt: Optional override of the system prompt context.
-                If provided, the chain should incorporate this prompt when invoked.
-        """
-        self.chain = chain
-        self.system_prompt = system_prompt
+    def query_vector_database(
+        self, content: str, service_name: Literal["discovery", "chat"]
+    ) -> str:
+        retrieved_docs = self.store.as_retriever().invoke(content)
+        context = "\n".join([doc.page_content for doc in retrieved_docs])
+        system_prompt: str = PROMPT_REGISTRY.get(f"{service_name}").template
+        self._logger.info(f"Using system prompt:\n{system_prompt}")
 
-    def retrieve_and_answer(
-        self,
-        history: List[ChatMessage],
-        user_input: str,
-    ) -> Tuple[str, List[dict]]:
-        """
-        Given conversation history and a new user message,
-        run retrieval-augmented generation and return the answer
-        along with the source documents (metadata).
+        prompt = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(
+                content=f"Here is the user's OAS file:\n{content}\n\nHere are the retrieved chunks:\n{context}"
+            ),
+        ]
 
-        Returns:
-            (answer_text, list_of_source_metadata)
+        self._logger.info(f"Using prompt:\n{prompt}")
 
-        Note:
-            We no longer wrap all exceptions in ChatServiceError so that
-            downstream callers (and tests) can see raw errors if desired.
-        """
-        # 1) Build the inputs dict. Optionally, include system_prompt if given.
-        inputs: dict = {"query": user_input, "chat_history": history}
-        if self.system_prompt:
-            # Some RetrievalQA implementations accept `system_prompt` key;
-            # if not, the chain should already have been built with the correct prompt.
-            inputs["system_prompt"] = self.system_prompt
-
-        # 2) Invoke the chain directly, allowing raw exceptions to bubble up
-        output = self.chain(inputs)
-
-        # 3) If output is a dict, extract 'result' and 'source_documents'
-        if isinstance(output, dict):
-            answer = output.get("result", "")
-            docs = output.get("source_documents", [])
-            sources = [getattr(doc, "metadata", {}) for doc in docs]
-            return answer, sources
-
-        # 4) If chain returned a simple string, wrap as answer, no sources
-        return str(output), []
+        return self.llm.invoke(prompt)

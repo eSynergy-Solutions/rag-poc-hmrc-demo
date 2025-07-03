@@ -1,7 +1,7 @@
 # app/models/ingest.py
 
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List
 
 
 class Chunk(BaseModel):

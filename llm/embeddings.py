@@ -1,12 +1,12 @@
 # app/llm/embeddings.py
 
-from functools import lru_cache
-from typing import List
-import os
-from langchain_openai import AzureOpenAIEmbeddings
 from llm.gailz_embedding import GailzEmbedding
 from core.config import settings
 from core.deps import get_logger
+# from functools import lru_cache
+# from typing import List
+# from langchain_openai import AzureOpenAIEmbeddings
+# import os
 
 
 def get_embedding_client() -> GailzEmbedding:

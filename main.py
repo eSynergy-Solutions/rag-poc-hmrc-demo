@@ -3,7 +3,7 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.v1 import discover, validate
+from api.v1 import discover, validate, chat
 from core.custom_logging import logger
 from core.config import settings
 
@@ -29,8 +29,8 @@ app.add_middleware(
 
 # ---- routers ----------------------------------------------------------
 # app.include_router(health.router, prefix="/v1", tags=["health"])
-# app.include_router(chat.router, prefix="/v1", tags=["chat"])
 app.include_router(discover.router, prefix="/v1", tags=["discover"])
+app.include_router(chat.router, prefix="/v1", tags=["chat"])
 app.include_router(validate.router, prefix="/v1", tags=["validate"])
 # app.include_router(history.router, prefix="/v1", tags=["history"])
 # app.include_router(test.router, prefix="/v1", tags=["test"])
@@ -42,9 +42,9 @@ logger.info(
     routes=[
         # "/v1/health/live",
         # "/v1/health/ready",
-        # "/v1/chat",
-        "/v1/discover",
         "/v1/validate",
+        "/v1/discover",
+        "/v1/chat",
         # "/v1/history",
         # "/v1/test",
     ],

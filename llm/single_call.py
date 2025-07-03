@@ -1,9 +1,9 @@
 # app/llm/single_call.py
 
 import os
-from langchain_openai import AzureChatOpenAI
 from fastapi import HTTPException
 from llm.gailz_llm import GailzLLM
+# from langchain_openai import AzureChatOpenAI
 
 # from llm.prompts import standard_rag_system_prompt
 
