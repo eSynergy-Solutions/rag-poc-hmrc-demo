@@ -76,7 +76,9 @@ def discover(
         raise HTTPException(status_code=422, detail="Query content cannot be empty")
     try:
         service = RagService()
-        answer_text = service.query_vector_database(user_query)
+        answer_text = service.query_vector_database(
+            user_query, service_name="discovery"
+        )
     except ChatServiceError as e:
         raise HTTPException(status_code=502, detail=str(e))
     except Exception as e:

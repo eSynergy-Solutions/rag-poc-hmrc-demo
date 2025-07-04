@@ -1,7 +1,7 @@
 # app/api/v1/discover.py
 
 from fastapi import APIRouter, HTTPException, Request, Body
-from models.chat import ChatMessage
+from models.chat import ChatMessage, ChatEndpointRequest
 from schemas.responses import QueryResponse
 from schemas.requests import QueryRequest
 from services.rag_service import RagService
@@ -11,23 +11,29 @@ router = APIRouter()
 
 
 @router.post("/chat", response_model=QueryResponse)
-def chat(
+async def chat(
     request: Request,
     payload: QueryRequest = Body(
         ...,
         examples=[
             {
-                "content": "Hi! Can you help me find similar APIs?",
+                "messages": [
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {
+                        "role": "user",
+                        "content": "Does Azure OpenAI support customer managed keys?",
+                    },
+                    {
+                        "role": "assistant",
+                        "content": "Yes, customer managed keys are supported by Azure OpenAI.",
+                    },
+                    {
+                        "role": "user",
+                        "content": "Do other Azure services support this too?",
+                    },
+                ],
                 "streaming": False,
-            },
-            {
-                "content": "Help me debug this code snippet...",
-                "streaming": False,
-            },
-            {
-                "content": "I am new to this API, can you guide me with some code examples in Java?",
-                "streaming": False,
-            },
+            }
         ],
     ),
 ):
@@ -35,12 +41,12 @@ def chat(
     Endpoint to run "chat" using RAG; history maintained and shared by the Frontend.
     """
 
-    user_query: str = payload.content
+    user_query: ChatEndpointRequest = payload.content
     if not user_query:
         raise HTTPException(status_code=422, detail="Query content cannot be empty")
     try:
         service = RagService()
-        answer_text = service.query_vector_database(user_query)
+        answer_text = service.query_vector_database(user_query, service_name="chat")
     except ChatServiceError as e:
         raise HTTPException(status_code=502, detail=str(e))
     except Exception as e:

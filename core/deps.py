@@ -55,7 +55,7 @@ def get_vector_store(
             password=config.PGVECTOR_PASSWORD,
         )
 
-        embeddings = get_embedding_client()
+        embeddings = get_embedding_client(logger=get_logger())
 
         store = PGVector(
             collection_name=config.PGVECTOR_COLLECTION,

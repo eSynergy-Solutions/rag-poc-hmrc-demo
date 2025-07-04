@@ -1,6 +1,6 @@
 # app/llm/single_call.py
 
-import os
+# import os
 from fastapi import HTTPException
 from llm.gailz_llm import GailzLLM
 # from langchain_openai import AzureChatOpenAI
@@ -22,11 +22,11 @@ def build_chat_instance(
     without retrieval from a vector store.
     """
 
-    api_version = os.getenv("OPENAI_API_VERSION", None)
-    if api_version is None:
-        raise ValueError(
-            "OPENAI_API_VERSION environment variable must be set for AzureChatOpenAI"
-        )
+    # api_version = os.getenv("OPENAI_API_VERSION", None)
+    # if api_version is None:
+    #     raise ValueError(
+    #         "OPENAI_API_VERSION environment variable must be set for AzureChatOpenAI"
+    #     )
 
     try:
         llm = GailzLLM(

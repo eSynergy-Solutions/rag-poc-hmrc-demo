@@ -2,14 +2,13 @@
 
 from llm.gailz_embedding import GailzEmbedding
 from core.config import settings
-from core.deps import get_logger
 # from functools import lru_cache
 # from typing import List
 # from langchain_openai import AzureOpenAIEmbeddings
 # import os
 
 
-def get_embedding_client() -> GailzEmbedding:
+def get_embedding_client(logger) -> GailzEmbedding:
     """
     Retrieve an embedding model via Gailz (using your GAILZ_EMBEDDING var).
     """
@@ -25,7 +24,7 @@ def get_embedding_client() -> GailzEmbedding:
 
     # 2. Instantiate the Gailz client with the embedding‐specific settings
     try:
-        client = GailzEmbedding(base_url=embedding_url, logger=get_logger())
+        client = GailzEmbedding(base_url=embedding_url, logger=logger)
         return client
     except Exception as e:
         raise RuntimeError(f"Client failed to initialise: {e}")
