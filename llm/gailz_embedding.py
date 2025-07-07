@@ -49,11 +49,22 @@ class GailzEmbedding:
             response.raise_for_status()
 
             result = response.json()
+            self._logger.debug(
+                f"Embedding response status code: {response.status_code}"
+            )
+            self._logger.debug(f"Embedding response content:\n{json.dumps(result)}")
             self._logger.debug(f"Embedding response received for {len(texts)} texts")
+
+            if "data" not in result or not isinstance(result["data"], list):
+                self._logger.error(
+                    "Unexpected response format: 'data' key missing or not a list"
+                )
+                raise ValueError("Unexpected response format from embedding API")
 
             # Extract embeddings from response
             # Assuming response format: {"data": [{"embedding": [...]}, ...]}
             embeddings = [item["embedding"] for item in result["data"]]
+            self._logger.info(f"Extracted {len(embeddings)} embeddings from response")
             return embeddings
 
         except requests.RequestException as e:

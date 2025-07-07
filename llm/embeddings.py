@@ -2,8 +2,9 @@
 
 from llm.gailz_embedding import GailzEmbedding
 from core.config import settings
+
 # from functools import lru_cache
-# from typing import List
+from typing import List
 # from langchain_openai import AzureOpenAIEmbeddings
 # import os
 
@@ -19,7 +20,7 @@ def get_embedding_client(logger) -> GailzEmbedding:
     if not embedding_url:
         raise RuntimeError(
             "Embedding configuration is incomplete. "
-            "Ensure GAILZ_EMBEDDING_STRING is not set."
+            "Ensure GAILZ_EMBEDDING_STRING is set."
         )
 
     # 2. Instantiate the Gailz client with the embedding‐specific settings
@@ -58,6 +59,33 @@ def get_embedding_client(logger) -> GailzEmbedding:
 #         return client
 #     except Exception as e:
 #         raise RuntimeError(f"Client failed to initialise: {e}")
+
+
+def get_embedding(text: str, logger) -> List[float]:
+    """
+    Retrieve an embedding vector for the given text via Gailz
+
+    """
+    embedding_url = str(getattr(settings, "GAILZ_EMBEDDING_STRING", "") or "")
+
+    if not embedding_url:
+        raise RuntimeError(
+            "Embedding configuration is incomplete. "
+            "Ensure GAILZ_EMBEDDING_STRING is set."
+        )
+
+    # 2. Instantiate the Gailz client with the embedding‐specific settings
+    try:
+        client = GailzEmbedding(base_url=embedding_url, logger=logger)
+    except Exception as e:
+        raise RuntimeError(f"Client failed to initialise: {e}")
+    try:
+        # 3. Request embeddings using the embedding-specific deployment
+        resp = client.embed_query(text=text)
+        # Assume resp.data is a list of objects with attribute 'embedding'
+        return resp  # type: ignore
+    except Exception as e:
+        raise RuntimeError(f"Embedding lookup failed: {e}")
 
 
 # @lru_cache(maxsize=1024)

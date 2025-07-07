@@ -49,4 +49,4 @@ def build_chat_instance(
 
         return llm
     except Exception:
-        raise HTTPException(status_code=500, detail="Failed to initialise Azure client")
+        raise HTTPException(status_code=500, detail="Failed to initialise Gailz client")
