@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, HTTPException, Request, Body
 from models.chat import ChatMessage, ChatEndpointRequest
-from schemas.responses import QueryResponse
 from schemas.requests import QueryRequest
 from services.rag_service import RagService
 from errors import ChatServiceError
@@ -10,7 +9,7 @@ from errors import ChatServiceError
 router = APIRouter()
 
 
-@router.post("/chat", response_model=QueryResponse)
+@router.post("/chat", response_model=ChatMessage)
 async def chat(
     request: Request,
     payload: QueryRequest = Body(

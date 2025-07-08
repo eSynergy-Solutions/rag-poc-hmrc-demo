@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, HTTPException, Request, Body
 from models.chat import ChatMessage
-from schemas.responses import QueryResponse
 from schemas.requests import QueryRequest
 from services.rag_service import RagService
 from errors import ChatServiceError
@@ -18,12 +17,8 @@ response_examples = {
                     "BasicSuccess": {
                         "summary": "Similar APIs with suggestions",
                         "value": {
-                            "messages": [
-                                {
-                                    "role": "assistant",
-                                    "content": "Here are some similar APIs I found that are relevant to your query. You can explore them further for more details.",
-                                }
-                            ]
+                            "role": "assistant",
+                            "content": "Here are some similar APIs I found that are relevant to your query. You can explore them further for more details.",
                         },
                     }
                 }
@@ -54,7 +49,7 @@ response_examples = {
 }
 
 
-@router.post("/discover", response_model=QueryResponse, responses=response_examples)
+@router.post("/discover", response_model=ChatMessage, responses=response_examples)
 def discover(
     request: Request,
     payload: QueryRequest = Body(

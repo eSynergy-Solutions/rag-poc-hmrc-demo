@@ -5,7 +5,8 @@ from services.validation_service import OASService
 from core.deps import get_settings
 from core.custom_logging import logger
 from schemas.requests import QueryRequest
-from schemas.responses import QueryResponse
+from models.chat import ChatMessage
+
 
 # from llm.chat_chain import build_chat_chain  # for future LLM-based path
 from fastapi import status
@@ -21,12 +22,8 @@ response_examples = {
                     "BasicSuccess": {
                         "summary": "Valid OpenAPI spec with suggestions",
                         "value": {
-                            "messages": [
-                                {
-                                    "role": "assistant",
-                                    "content": "The OpenAPI spec is valid, but consider removing extra line breaks in the info.description.",
-                                }
-                            ]
+                            "role": "assistant",
+                            "content": "The OpenAPI spec is valid, but consider removing extra line breaks in the info.description.",
                         },
                     }
                 }
@@ -59,7 +56,7 @@ response_examples = {
 
 @router.post(
     "/validate",
-    response_model=QueryResponse,
+    response_model=ChatMessage,
     responses=response_examples,
 )
 def validate(
@@ -118,9 +115,42 @@ def validate(
 
     llm_response = service.run_oas_check_llm(load_data)
     if llm_response:
-        return QueryResponse(messages=[llm_response])
+        return llm_response
     else:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Unexpected error during LLM-based validation",
         )
+
+@router.post(
+    "/oas-checker",
+    response_model=ChatMessage,
+    responses=response_examples,
+)
+def oas_checker(
+    request: Request,
+    payload: QueryRequest = Body(
+        ...,
+        examples=[
+            {
+                "content": "openapi: 3.0.3\ninfo:\n  title: Hello World API\n  version: '1.0'\npaths:....",
+                "streaming": False,
+            },
+        ],
+    ),
+    settings=Depends(get_settings),
+):
+    """
+    Endpoint to validate an OpenAPI spec and return YAML formatted suggestions.
+    
+    ⚠️ DEPRECATED: This is a duplicate method of the /validate endpoint.
+    This route exists for backward compatibility. Please use /validate instead.
+    
+    Run static validation first, then LLM-based suggestions.
+    This endpoint does not maintain state or conversation history.
+    It expects a valid OpenAPI spec in YAML format as input.
+    The response will be a YAML formatted string with suggestions or errors.
+    If the input is not a valid OpenAPI spec, it will return an error.
+    """
+    # Return the same ChatMessage as validate function
+    return validate(request, payload, settings)
